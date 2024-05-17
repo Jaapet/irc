@@ -1,8 +1,23 @@
 #include "Server.hpp"
-
-int main()
+#include <unistd.h>
+int main(int argc, char **argv)
 {
 	//Do parsing shit here
-	Server irc(void);
+	//check if port is valid
+	if (argc != 3)
+	{
+		Debug::Error("Invalid use it should be \"./ircserv <port> <password>\"");
+		std::exit(1);
+	}
+	char hostname[256];
+	std::string pwd(argv[1]);
+	int port = atoi(argv[2]);
+	if (gethostname(hostname, sizeof(hostname)) != 0)
+	{
+		Debug::Error("Invalid hostname JPTA");
+		std::exit(1);
+	}
 
+	Server irc(std::string(hostname), pwd , port);
+	std::cout << "test0" << std::endl;
 }

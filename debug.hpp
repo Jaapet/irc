@@ -12,23 +12,11 @@
 
 namespace Debug
 {
-	void Info(std::string const &msg)
-	{
-		std::cout << WHITE <<"INFO:\t\t" << msg << RESET << std::endl;
-	}
+	void Info(std::string const &msg);
 
-	void Success(std::string const &msg)
-	{
-		std::cout << GREEN <<"SUCCESS:\t" << msg << RESET << std::endl;
-	}
+	void Success(std::string const &msg);
 
-	void Warning(std::string const &msg)
-	{
-		std::cout << YELLOW <<"WARN:\t\t" << msg << RESET << std::endl;
-	}
+	void Warning(std::string const &msg);
 
-	void Error(std::string const &msg)
-	{
-		std::cout << RED <<"PANIC:\t" << msg << RESET << std::endl;
-	}
+	void Error(std::string const &msg);
 }

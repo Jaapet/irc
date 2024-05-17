@@ -1,6 +1,4 @@
-#include "Channel.hpp"
-#include "Command.hpp"
-#include "Session.hpp"
+
 #pragma once
 
 #include <iostream>
@@ -13,11 +11,13 @@
 #include <arpa/inet.h>
 
 
+#include "Channel.hpp"
+#include "Command.hpp"
+#include "Session.hpp"
+#include "debug.hpp"
 
-
-
-int const BUFFER_SIZE = 512; 
-int const BACKLOG = 10;
+#define BUFFER_SIZE  512
+#define BACKLOG  10
 
 class Session;
 
@@ -39,8 +39,8 @@ private:
 	// uint const _buffer_size = 512; // Size of the buffer of the socket, basically will truncate msg over X bytes
 	// uint const _max_connections_queue = 10; // Maximum cnx pending into the socket queue before getting accepted, also called BACKLOG
 
-	std::map<std::string, Channel> _channels; // map of the channels, channel name is the key of the map, vallue is the object channel
-	std::map<std::string, Command> _commands; // map of the commands, command is the key to execute the associated cmd
+	// std::map<std::string, Channel> _channels; // map of the channels, channel name is the key of the map, vallue is the object channel
+	// std::map<std::string, Command> _commands; // map of the commands, command is the key to execute the associated cmd
 	std::map<int, Session *> _sessions; //map of the sessions, session fd is the key
 	
 	
@@ -73,10 +73,10 @@ public:
 		{return(sizeof(this->_address_socket));}
 	bool getKill(void) const
 		{return (this->_should_i_end_this_suffering);}
-	int const &getBufferSize(void) const
-		{return (BUFFER_SIZE);}
-	int const &getBackLog(void) const
-		{return (BACKLOG);}
+	int  getBufferSize(void) const
+		{return (512);}
+	int  getBackLog(void) const
+		{return (10);}
 
 	//Methods
 	void killSession(int const session_fd);

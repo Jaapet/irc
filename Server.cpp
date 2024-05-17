@@ -1,7 +1,6 @@
 #include "Server.hpp"
 #include "Session.hpp"
 #include <cstring>
-#include "debug.hpp"
 //CONSTRUCTOR//////////////////////////////////////////////////
 Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(hostname), _password(pwd), _port(port) 
 {
@@ -16,7 +15,7 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 		this->bindSocket();
 		this->launchListen();
 		this->initSessionsFds();
-		Debug::Success("Launching of " + this->getHostName() + " was sucessfull");
+		Debug::Success("Launching of " + this->getHostName() + " IRC server was sucessfull");
 	}
 	catch(const std::exception& e)
 	{
@@ -62,7 +61,7 @@ void Server::createSocket(void)
 {
 	this->_fd_socket = socket(AF_INET, SOCK_STREAM, 0); // TO COMMENT JPTA
 	if (this->_fd_socket < 0){
-		// throw ServerSocketError
+		throw(Server::SocketCreationError()); 
 	}
 }
 
@@ -75,15 +74,15 @@ void Server::bindSocket(void)
 	this->_address_socket.sin_port = htons(this->getPort()); //htons is used to convert a 16-bit quantity from host byte order to network byte order
 	Debug::Info("Attempt to bind the socket");
 	if (bind(this->getFdSocket(), (struct sockaddr *)&this->getAddressSocket(), this->getLenSocket()) < 0){
-		//throw SocketBindingError
+		throw(Server::SocketBindingError()); 
 	}
 }
 
 void Server::launchListen(void)
 {
-	Debug::Info("Attempt to listen on port " + this->getPort());
+	Debug::Info("Attempt to listening ");
 	if (listen(this->getFdSocket(), this->getBackLog()) < 0){
-		//throw SocketListenError
+		throw(Server::SocketListenError()); 
 	}
 }
 
@@ -107,7 +106,7 @@ void Server::handleConnections(void)
 		session_fd_cpy = this->_sessions_fd;
 		if(select(fd_max + 1, &session_fd_cpy, NULL, NULL, NULL) == -1) //CHANGE NULL TO HANDLE TIMEOUT
 		{
-			//throw SelectCallError
+			throw(Server::SelectCallError()); 
 		}
 
 		for(int i = 0; i <= fd_max; i++)
@@ -123,15 +122,14 @@ void Server::handleConnections(void)
 					if (tmp_sess->getFdSocket() == 0)
 					{
 						delete tmp_sess;
-						//throw SessionCreationError
+						throw(Server::SessionCreationError()); 
 					}
 					else
 					{
 						FD_SET(tmp_sess->_fd_socket, &this->_sessions_fd);
 						if(tmp_sess->_fd_socket > fd_max)
 						{
-							Debug::Warning("New value of fd_max from:");
-							std::cout << "\t\t\t" << fd_max << " to " << tmp_sess->_fd_socket << std::endl;		
+							// Debug::Warning("New value of fd_max");
 							fd_max = tmp_sess->_fd_socket;
 						}
 						this->_sessions[tmp_sess->_fd_socket] = tmp_sess;
@@ -149,7 +147,7 @@ void Server::handleConnections(void)
 					{
 						if (nbytes == 0)
 						{
-							Debug::Warning("Connection closed by: " + std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)));
+							Debug::Warning("Connection closed by: " + std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)) + " Attempting to close the session server side");
 						}
 						else
 						{
@@ -162,8 +160,7 @@ void Server::handleConnections(void)
 						if(nbytes >= this->getBufferSize())
 							Debug::Warning("Packet too long from: " + std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)) + " it will be truncated");
 						buffer[nbytes] = '\0';
-						Debug::Info("Received " + std::string(buffer));
-						Debug::Info("Previous message was from: " + std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)));
+						Debug::Info(std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)) + ": " + std::string(buffer));
 						//DO SOMETHIN JPTA
 					}
 				}
