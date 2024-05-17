@@ -96,9 +96,7 @@ void Server::initSessionsFds(void)
 void Server::handleConnections(void)
 {
 	int fd_max = this->getFdSocket(); //TO COMMENT
-	fd_set session_fd_cpy; //Copy of master session_fd
-	Session *tmp_sess;
-	socklen_t tmp_size = 0;
+	fd_set session_fd_cpy; //store a copy of session_fd need more explanations
 	char buffer[BUFFER_SIZE];
 
 	while(!(this->getKill()))
@@ -116,8 +114,8 @@ void Server::handleConnections(void)
 				if (i == this->getFdSocket()) // New client found lets make a session
 				{
 					//MAKE A NEW SESSION JPTA
-					tmp_sess = new Session(this);
-					tmp_size = tmp_sess->getLenSocket();
+					Session *tmp_sess = new Session(this);
+					socklen_t tmp_size = tmp_sess->getLenSocket();
 					tmp_sess->_fd_socket = accept(this->getFdSocket(), (struct sockaddr*)&tmp_sess->_address_socket, &tmp_size);
 					if (tmp_sess->getFdSocket() == 0)
 					{
@@ -160,8 +158,15 @@ void Server::handleConnections(void)
 						if(nbytes >= this->getBufferSize())
 							Debug::Warning("Packet too long from: " + std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)) + " it will be truncated");
 						buffer[nbytes] = '\0';
-						Debug::Info(std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)) + ": " + std::string(buffer));
+						Debug::Message(std::string(buffer), i);
 						//DO SOMETHIN JPTA
+
+						//CMD FROM HEXCHAT
+						// CAP //Ignore 	
+						// NICK
+						// USER
+						// PASS
+						// QUIT
 					}
 				}
 			}

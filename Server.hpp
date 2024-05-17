@@ -74,9 +74,9 @@ public:
 	bool getKill(void) const
 		{return (this->_should_i_end_this_suffering);}
 	int  getBufferSize(void) const
-		{return (512);}
+		{return (512);} // MAKE SOMETHING CLEAN JPTA
 	int  getBackLog(void) const
-		{return (10);}
+		{return (10);}  // MAKE SOMETHING CLEAN JPTA
 
 	//Methods
 	void killSession(int const session_fd);

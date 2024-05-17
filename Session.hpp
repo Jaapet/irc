@@ -18,11 +18,15 @@ class Session
 private:
 	Server const *_server;
 	
-
+	bool _pass_valid;
 	std::string _username;
+	bool _user_is_set;
 	std::string _nickname;
+	bool _nick_is_set;
 	std::string _realname;
+	bool _realname_is_set;
 
+	std::string channel;
 	//.. Add whatever you need
 
 public:
