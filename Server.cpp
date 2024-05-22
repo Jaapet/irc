@@ -11,9 +11,11 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 	Debug::Info("Attempt to initialize " + this->getHostName() + " IRC server");
 	try
 	{
+		
 		this->createSocket();
 		this->bindSocket();
 		this->launchListen();
+		this->mapCommands();
 		this->initSessionsFds();
 		Debug::Success("Launching of " + this->getHostName() + " IRC server was sucessfull");
 	}
@@ -93,12 +95,17 @@ void Server::initSessionsFds(void)
 	FD_SET(this->getFdSocket(), &this->_sessions_fd); // TO COMMENT STRAIGHT FROM GPT	
 }
 
+void Server::mapCommands(void)
+{
+	Debug::Info("Attempt to map commands ");
+	this->_commands["PASS"] = &(Command::pass);
+}
+
+
 void Server::handleConnections(void)
 {
 	int fd_max = this->getFdSocket(); //TO COMMENT
-	fd_set session_fd_cpy; //Copy of master session_fd
-	Session *tmp_sess;
-	socklen_t tmp_size = 0;
+	fd_set session_fd_cpy; //store a copy of session_fd need more explanations
 	char buffer[BUFFER_SIZE];
 
 	while(!(this->getKill()))
@@ -116,8 +123,8 @@ void Server::handleConnections(void)
 				if (i == this->getFdSocket()) // New client found lets make a session
 				{
 					//MAKE A NEW SESSION JPTA
-					tmp_sess = new Session(this);
-					tmp_size = tmp_sess->getLenSocket();
+					Session *tmp_sess = new Session(this);
+					socklen_t tmp_size = tmp_sess->getLenSocket();
 					tmp_sess->_fd_socket = accept(this->getFdSocket(), (struct sockaddr*)&tmp_sess->_address_socket, &tmp_size);
 					if (tmp_sess->getFdSocket() == 0)
 					{
@@ -132,12 +139,17 @@ void Server::handleConnections(void)
 							// Debug::Warning("New value of fd_max");
 							fd_max = tmp_sess->_fd_socket;
 						}
+						if(this->_sessions[tmp_sess->_fd_socket] != NULL)
+						{
+							Debug::Error("Fatal error, sessions fd duplicated: " + tmp_sess->_fd_socket);
+							exit(1);
+						}
 						this->_sessions[tmp_sess->_fd_socket] = tmp_sess;
 
 						Debug::Info("New connection from " + std::string(inet_ntoa(tmp_sess->_address_socket.sin_addr)));
-						//Clear variables for new cnx
-						tmp_sess = NULL;
-						tmp_size = 0;
+						//Clear variables for new cnx (Maybe not mandatory, to test)
+						// tmp_sess = NULL;
+						// tmp_size = 0;
 					}
 				}
 				else // if its not a new client
@@ -160,8 +172,19 @@ void Server::handleConnections(void)
 						if(nbytes >= this->getBufferSize())
 							Debug::Warning("Packet too long from: " + std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)) + " it will be truncated");
 						buffer[nbytes] = '\0';
-						Debug::Info(std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)) + ": " + std::string(buffer));
-						//DO SOMETHIN JPTA
+						Debug::Message(std::string(buffer), i);
+						//TESTS
+						if (this->_commands["PASS"] != NULL)
+							this->_commands["PASS"](this, this->_sessions[i], buffer);
+
+
+
+						//CMD FROM HEXCHAT
+						// CAP //Ignore 	
+						// NICK
+						// USER
+						// PASS
+						// QUIT
 					}
 				}
 			}

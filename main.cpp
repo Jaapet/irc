@@ -10,8 +10,9 @@ int main(int argc, char **argv)
 		std::exit(1);
 	}
 	char hostname[256];
-	std::string pwd(argv[1]);
-	int port = atoi(argv[2]);
+	int port = atoi(argv[1]);
+	std::string pwd(argv[2]);
+	
 	if (gethostname(hostname, sizeof(hostname)) != 0)
 	{
 		Debug::Error("Invalid hostname JPTA");
