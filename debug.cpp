@@ -19,5 +19,10 @@ void Debug::Error(std::string const &msg)
 
 void Debug::Message(std::string const &msg, int session_fd)
 {
-	std::cerr << CYAN <<"[USER " << session_fd << "]: " << msg << RESET;
+	std::cout << CYAN <<"[FROM USER_FD=" << session_fd << "]: " << msg << RESET << std::endl;
+}
+
+void Debug::Reply(std::string const &repcode, int session_fd)
+{
+	std::cout << MAGENTA <<"[TO USER_FD=" << session_fd << "]: " << repcode << RESET << std::endl;
 }

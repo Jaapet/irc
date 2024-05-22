@@ -12,8 +12,9 @@
 
 
 #include "Channel.hpp"
-#include "Command.hpp"
 #include "Session.hpp"
+
+#include "command.hpp"
 #include "debug.hpp"
 
 #define BUFFER_SIZE  512
@@ -35,25 +36,24 @@ private:
 	std::string _hostname; // hostname of the irc server
 	std::string _password; // password to join the server, no getter for obvious reasons
 	uint16_t	_port; // uint16_t for unsigned int of 16 bit  0 to 65535 because a port can only be in this range according to the OS
-
+	bool _should_i_end_this_suffering; //Bool set to true to kill the server
 	// uint const _buffer_size = 512; // Size of the buffer of the socket, basically will truncate msg over X bytes
 	// uint const _max_connections_queue = 10; // Maximum cnx pending into the socket queue before getting accepted, also called BACKLOG
 
 	// std::map<std::string, Channel> _channels; // map of the channels, channel name is the key of the map, vallue is the object channel
-	// std::map<std::string, Command> _commands; // map of the commands, command is the key to execute the associated cmd
 	std::map<int, Session *> _sessions; //map of the sessions, session fd is the key
-	
+	typedef void (*CommandPtr)(Server *, Session *, std::string);
+	std::map<std::string, CommandPtr > _commands;
 	
 	//init method, should only be called by constructor
 	void createSocket(void);
 	void bindSocket(void);
 	void launchListen(void);
 	void initSessionsFds(void);
+	void mapCommands(void);
 	void handleConnections(void);
 
-
-
-	bool _should_i_end_this_suffering; //Bool set to true to kill the server
+	
 public:
 	Server(std::string hostname, std::string pwd, uint16_t port);
 	~Server();
@@ -74,9 +74,9 @@ public:
 	bool getKill(void) const
 		{return (this->_should_i_end_this_suffering);}
 	int  getBufferSize(void) const
-		{return (512);} // MAKE SOMETHING CLEAN JPTA
+		{return (BUFFER_SIZE);} // MAKE SOMETHING CLEAN JPTA
 	int  getBackLog(void) const
-		{return (10);}  // MAKE SOMETHING CLEAN JPTA
+		{return (BACKLOG);}  // MAKE SOMETHING CLEAN JPTA
 
 	//Methods
 	void killSession(int const session_fd);

@@ -18,7 +18,7 @@ class Session
 private:
 	Server const *_server;
 	
-	bool _pass_valid;
+	bool _pass_is_set;
 	std::string _username;
 	bool _user_is_set;
 	std::string _nickname;
@@ -40,9 +40,16 @@ public:
 		{return (sizeof(_address_socket));}
 	int const &getFdSocket(void) const
 		{return (this->_fd_socket);}
+	bool getPassIsSet(void) const
+		{return (this->_pass_is_set);}
+	std::string const &getNickName(void) const
+		{return(this->_nickname);}
 	//DO YOUR OWN GETTERS
 	// ...
 	//
+
+	void setPassTrue(void)
+		{this->_pass_is_set = true;}
 	
 
 };
