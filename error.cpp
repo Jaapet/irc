@@ -2,17 +2,17 @@
 #include "error.hpp"
 
 // send(i, msg.c_str(), msg.length(), 0);
-void Error::ERR_ALREADYREGISTRED_462(Server *server, Session *session)
+std::string Error::ERR_ALREADYREGISTRED_462(Server *server, Session *session)
 {
 	Debug::Reply("ERR_ALREADYREGISTRED(462)", session->getFdSocket());
 
 	std::string msg = Reply::getPrefix(server, session, "462") + ":You may not reregister" + Reply::endr;
-	send(session->getFdSocket(), msg.c_str(), msg.length(), 0);
+	return(msg);	
 }
-void Error::ERR_PASSWDMISMATCH_464(Server *server, Session *session)
+std::string Error::ERR_PASSWDMISMATCH_464(Server *server, Session *session)
 {
 	Debug::Reply("ERR_PASSWDMISMATCH_464", session->getFdSocket());
 
 	std::string msg = Reply::getPrefix(server, session, "464") + ":Password incorrect" + Reply::endr;
-	send(session->getFdSocket(), msg.c_str(), msg.length(), 0);
+	return(msg);
 }

@@ -9,11 +9,10 @@ std::string Reply::getPrefix(Server *server, Session *session, std::string rep_c
 	prefix = ":" + server->getHostName() + " " + rep_code + " " + session->getNickName() + " ";
 	return(prefix);
 }
-void Reply::RPL_WELCOME_001(Server *server, Session *session)
+std::string Reply::RPL_WELCOME_001(Server *server, Session *session)
 {
 	Debug::Reply("RPL_WELCOME(001)", session->getFdSocket());
 	
 	std::string msg = Reply::getPrefix(server, session, "001") + ":Welcome to the ft_irc " + session->getNickName() + Reply::endr;
-
-	send(session->getFdSocket(), msg.c_str(), msg.length(), 0);
+	return(msg);
 }

@@ -17,7 +17,7 @@ static std::string removeCRLF(std::string const &str)
 	return(out);
 }
 
-static std::string commandToUpper(std::string const &str)
+static std::string strToUpper(std::string const &str)
 {
 	std::string out = str;
 
@@ -50,7 +50,7 @@ static std::vector<std::string> parserPASS(std::string const &rawline)
 
 
     
-	command = commandToUpper(command);
+	command = strToUpper(command);
     result.push_back(command);
 	arg = removeCRLF(arg);
     result.push_back(arg);
@@ -58,7 +58,15 @@ static std::vector<std::string> parserPASS(std::string const &rawline)
     return result;
 }
 
-void	Command::pass(Server *server, Session *session, std::string rawline)
+std::string cap(Server *server, Session *session, std::string rawline)
+{
+	(void)server;
+	(void)session;
+	(void)rawline;
+	return("");
+}
+
+std::string	Command::pass(Server *server, Session *session, std::string rawline)
 {
 	std::vector<std::string> args = parserPASS(rawline);
 	
@@ -66,31 +74,50 @@ void	Command::pass(Server *server, Session *session, std::string rawline)
 	if(args[0] != "PASS" || args[1].empty() == true)
 	{
 		Debug::Warning("PASS should not be called, arg0: " + args[0] + " arg1 " + args[1] + "\n rawline: \n" + rawline);
-		return;
+		return ("");
 	}
 
 	if(session->getPassIsSet() == true)
 	{
-		Error::ERR_ALREADYREGISTRED_462(server, session);
+		return(Error::ERR_ALREADYREGISTRED_462(server, session));
 		// server->killSession(session->getFdSocket()); //Disconect the user ?
-		return;
 	}
 	
 
 	//Passwd check
 	if(server->checkPassword(args[1]) == false)
 	{
-		Error::ERR_PASSWDMISMATCH_464(server, session);
-		return;
+		return(Error::ERR_PASSWDMISMATCH_464(server, session));
 	}
 	else
 	{
-		Reply::RPL_WELCOME_001(server, session);
 		session->setPassTrue();
-		return;
+		return(Reply::RPL_WELCOME_001(server, session));
 	}
-	return;
+	return("");
 }
 
+static std::vector<std::string> parserNICK(std::string const &rawline)
+{
+	return(parserPASS(rawline));
+	// PASS Is parsed the same way than NICK
+}
+std::string	Command::nick(Server *server, Session *session, std::string rawline)
+{
+	std::vector<std::string> args = parserNICK(rawline);
 
+	if(args[0] != "NICK" || args[1].empty() == true)
+	{
+		Debug::Warning("NICK should not be called, arg0: " + args[0] + " arg1 " + args[1] + "\n rawline: \n" + rawline);
+		return ("");
+	}
+	//Check if nickname is valid format
+	//Check if nickname is already used capitalize it
+	//CHeck if nic
+}
+
+std::string	Command::user(Server *server, Session *session, std::string rawline)
+{
+
+}
 // send(i, msg.c_str(), msg.length(), 0);

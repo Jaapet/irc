@@ -98,7 +98,12 @@ void Server::initSessionsFds(void)
 void Server::mapCommands(void)
 {
 	Debug::Info("Attempt to map commands ");
+	this->_commands["CAP"] = &(Command::cap);
 	this->_commands["PASS"] = &(Command::pass);
+	this->_commands["NICK"] = &(Command::nick);
+	this->_commands["USER"] = &(Command::user);
+	
+	
 }
 
 
@@ -174,9 +179,12 @@ void Server::handleConnections(void)
 						buffer[nbytes] = '\0';
 						Debug::Message(std::string(buffer), i);
 						//TESTS
-						if (this->_commands["PASS"] != NULL)
-							this->_commands["PASS"](this, this->_sessions[i], buffer);
 
+						std::string outBuffer; //All the replies should sent in the same buffer! One send per select
+						outBuffer = (this->_commands["PASS"](this, this->_sessions[i], buffer));
+
+						if(!(outBuffer.empty()))
+							send(i, outBuffer.c_str(), outBuffer.length(), 0); //CHECK AVAILABLE FLAGS FOR SEND
 
 
 						//CMD FROM HEXCHAT
