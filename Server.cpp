@@ -1,10 +1,18 @@
 #include "Server.hpp"
 #include "Session.hpp"
+#include "Message.hpp"
 #include <cstring>
+#include <ctime>
 //CONSTRUCTOR//////////////////////////////////////////////////
 Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(hostname), _password(pwd), _port(port) 
 {
 	//Init
+	this->_servername = "PEPPA_IRC";
+	this->_networkname = "NETWORK_NAME";
+	this->_version = "1234";
+	this->_available_user_modes = "AVAILABLE_USER_MODES";
+	this->_available_channel_modes = "AVAILABLE_CHANNEL_MODES";
+	this->_creation_date = this->getCurrentDate();
 	Debug::Info("Persue the server to not commit suicide");
 	this->_should_i_end_this_suffering = false;
 
@@ -17,7 +25,7 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 		this->launchListen();
 		this->mapCommands();
 		this->initSessionsFds();
-		Debug::Success("Launching of " + this->getHostName() + " IRC server was sucessfull");
+		Debug::Success("Launching of " + this->getHostName() + " IRC server was sucessfull " + this->getCurrentDate());
 	}
 	catch(const std::exception& e)
 	{
@@ -175,16 +183,39 @@ void Server::handleConnections(void)
 					else
 					{
 						if(nbytes >= this->getBufferSize())
-							Debug::Warning("Packet too long from: " + std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)) + " it will be truncated");
+						{
+							Debug::Warning("Packet too long from: " + std::string(inet_ntoa(this->_sessions[i]->_address_socket.sin_addr)) + " closing connection...");
+							this->killSession(i);
+						}
+							
 						buffer[nbytes] = '\0';
 						Debug::Message(std::string(buffer), i);
+						
+						//For each commands in the buffer
+							// {
+								Message tmp_msg;
+								std::string outBuffer;
+								std::string inBuffer(buffer);
+								inBuffer = this->removeCRLF(inBuffer);
+								this->parseMessage(inBuffer, tmp_msg);
+								if(!(tmp_msg.command.empty()))
+								{
+									tmp_msg.command = this->strToUpper(tmp_msg.command);
+									
+									if(this->_commands[tmp_msg.command] != NULL)
+										outBuffer = this->_commands[tmp_msg.command](this, this->_sessions[i], tmp_msg);
+									else
+										outBuffer = "TOTOTOTO Command not found";
+									if(!(outBuffer.empty()))
+										send(i, outBuffer.c_str(), outBuffer.length(), MSG_NOSIGNAL);
+								}
+							// }
+						
+						
+						
+						
 						//TESTS
-
-						std::string outBuffer; //All the replies should sent in the same buffer! One send per select
-						outBuffer = (this->_commands["PASS"](this, this->_sessions[i], buffer));
-
-						if(!(outBuffer.empty()))
-							send(i, outBuffer.c_str(), outBuffer.length(), 0); //CHECK AVAILABLE FLAGS FOR SEND
+						
 
 
 						//CMD FROM HEXCHAT
@@ -217,4 +248,128 @@ void Server::killSession(int const session_fd)
 	close(session_fd);
 	FD_CLR(session_fd, &this->_sessions_fd);
 	Debug::Success("Session closed from: " + tmp);
+}
+
+void Server::parseMessage(const std::string &message, Message &outmessage) 
+{
+	if(message[0] == '\r' && message[1] == '\n')
+		return;
+    outmessage.clear();
+    
+    size_t pos = 0;
+    size_t end = message.size();
+
+    // Check for sender (prefix)
+    if (message[pos] == ':') {
+        size_t prefixEnd = message.find(' ', pos);
+        if (prefixEnd != std::string::npos) 
+		{
+            outmessage.sender = message.substr(pos + 1, prefixEnd - pos - 1);
+            pos = prefixEnd + 1;
+        } 
+		else 
+		{
+            return; // Invalid message format
+        }
+    } 
+	else 
+	{
+        outmessage.sender = "";
+    }
+
+    // Get command
+    size_t commandEnd = message.find(' ', pos);
+    if (commandEnd != std::string::npos) 
+	{
+        outmessage.command = message.substr(pos, commandEnd - pos);
+        pos = commandEnd + 1;
+    } 
+	else 
+	{
+        outmessage.command = message.substr(pos);
+        return;
+    }
+
+    // Get params and payload
+    while (pos < end) {
+        if (message[pos] == ':') 
+		{
+            // Trailing param (payload)
+            outmessage.payload = message.substr(pos + 1);
+            break;
+        }
+        
+        size_t paramEnd = message.find(' ', pos);
+        if (paramEnd != std::string::npos) 
+		{
+            outmessage.params.push_back(message.substr(pos, paramEnd - pos));
+            pos = paramEnd + 1;
+        } 
+		else 
+		{
+            outmessage.params.push_back(message.substr(pos));
+            break;
+        }
+    }
+}
+
+
+std::string Server::removeCRLF(std::string const &str)
+{
+	std::string out = str;
+
+	if (!out.empty() && (out[out.size() - 1] == '\n' || out[out.size() - 1] == '\r')) {
+        out.erase(out.size() - 1);
+    }
+    if (!out.empty() && (out[out.size() - 1] == '\n' || out[out.size() - 1] == '\r')) {
+        out.erase(out.size() - 1);
+    }
+	return(out);
+}
+
+std::string Server::strToUpper(std::string const &str)
+{
+	std::string out = str;
+
+	for (std::string::iterator it = out.begin(); it != out.end(); ++it) 
+	{
+		*it = std::toupper(*it);
+    }
+
+	return(out);
+}
+
+Session *Server::getSession(std::string const &nickname)
+{
+	std::map<int, Session*>::iterator it;
+    Session* foundSession = NULL;
+	for (it = this->_sessions.begin(); it != this->_sessions.end(); ++it) 
+	{
+    	if (this->strToUpper(it->second->getNickName()) == this->strToUpper(nickname)) 
+		{
+            foundSession = it->second;
+            break;
+        }
+    }
+	return(foundSession);
+}
+
+std::string Server::getCurrentDate(void)
+{
+	// Get the current time as a time_t object
+    std::time_t currentTime = std::time(NULL);
+    // Convert to local time representation
+    std::tm* localTime = std::localtime(&currentTime);
+    // Buffer to hold the formatted date string
+    char dateString[100];
+    // Format the date into a human-readable string
+    // Format specifiers:
+    // %Y - year with century
+    // %m - month (01-12)
+    // %d - day of the month (01-31)
+    // %H - hour (00-23)
+    // %M - minute (00-59)
+    // %S - second (00-60)
+    std::strftime(dateString, sizeof(dateString), "%Y-%m-%d %H:%M:%S", localTime);
+    return (dateString);
 }

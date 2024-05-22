@@ -1,4 +1,4 @@
-SRCS = main.cpp Server.cpp Session.cpp debug.cpp command.cpp reply.cpp error.cpp
+SRCS = main.cpp Server.cpp Session.cpp debug.cpp command.cpp reply.cpp error.cpp Message.cpp
 NAME = ircserv
 CC = c++
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98 #-pedantic -g
