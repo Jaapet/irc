@@ -98,7 +98,12 @@ void Server::initSessionsFds(void)
 void Server::mapCommands(void)
 {
 	Debug::Info("Attempt to map commands ");
+	this->_commands["CAP"] = &(Command::cap);
 	this->_commands["PASS"] = &(Command::pass);
+	this->_commands["NICK"] = &(Command::nick);
+	this->_commands["USER"] = &(Command::user);
+	
+	
 }
 
 
