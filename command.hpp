@@ -8,5 +8,5 @@ class Server;
 
 namespace Command
 {
-	void	pass(Server *server, Session *session, std::string rawline);
+	std::string	pass(Server *server, Session *session, std::string rawline);
 };

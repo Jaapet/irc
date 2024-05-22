@@ -58,7 +58,7 @@ static std::vector<std::string> parserPASS(std::string const &rawline)
     return result;
 }
 
-void	Command::pass(Server *server, Session *session, std::string rawline)
+std::string	Command::pass(Server *server, Session *session, std::string rawline)
 {
 	std::vector<std::string> args = parserPASS(rawline);
 	
@@ -66,30 +66,27 @@ void	Command::pass(Server *server, Session *session, std::string rawline)
 	if(args[0] != "PASS" || args[1].empty() == true)
 	{
 		Debug::Warning("PASS should not be called, arg0: " + args[0] + " arg1 " + args[1] + "\n rawline: \n" + rawline);
-		return;
+		return ("");
 	}
 
 	if(session->getPassIsSet() == true)
 	{
-		Error::ERR_ALREADYREGISTRED_462(server, session);
+		return(Error::ERR_ALREADYREGISTRED_462(server, session));
 		// server->killSession(session->getFdSocket()); //Disconect the user ?
-		return;
 	}
 	
 
 	//Passwd check
 	if(server->checkPassword(args[1]) == false)
 	{
-		Error::ERR_PASSWDMISMATCH_464(server, session);
-		return;
+		return(Error::ERR_PASSWDMISMATCH_464(server, session));
 	}
 	else
 	{
-		Reply::RPL_WELCOME_001(server, session);
 		session->setPassTrue();
-		return;
+		return(Reply::RPL_WELCOME_001(server, session));
 	}
-	return;
+	return("");
 }
 
 

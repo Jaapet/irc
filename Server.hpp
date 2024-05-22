@@ -42,7 +42,7 @@ private:
 
 	// std::map<std::string, Channel> _channels; // map of the channels, channel name is the key of the map, vallue is the object channel
 	std::map<int, Session *> _sessions; //map of the sessions, session fd is the key
-	typedef void (*CommandPtr)(Server *, Session *, std::string);
+	typedef std::string (*CommandPtr)(Server *, Session *, std::string);
 	std::map<std::string, CommandPtr > _commands;
 	
 	//init method, should only be called by constructor
