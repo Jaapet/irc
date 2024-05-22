@@ -2,79 +2,31 @@
 #include "debug.hpp"
 #include "reply.hpp"
 #include "error.hpp"
+#include "Message.hpp"
 #include <vector>
 
-static std::string removeCRLF(std::string const &str)
-{
-	std::string out = str;
-
-	if (!out.empty() && (out[out.size() - 1] == '\n' || out[out.size() - 1] == '\r')) {
-        out.erase(out.size() - 1);
-    }
-    if (!out.empty() && (out[out.size() - 1] == '\n' || out[out.size() - 1] == '\r')) {
-        out.erase(out.size() - 1);
-    }
-	return(out);
-}
-
-static std::string strToUpper(std::string const &str)
-{
-	std::string out = str;
-
-	for (std::string::iterator it = out.begin(); it != out.end(); ++it) {
-        *it = std::toupper(*it);
-    }
-
-	return(out);
-}
-
-static std::vector<std::string> parserPASS(std::string const &rawline)
-{
-	std::vector<std::string> result;
-	std::string command;
-	std::string arg;
-	bool foundSpace = false;
-
-	for (std::string::const_iterator it = rawline.begin(); it != rawline.end(); ++it)
-	{
-	    if (!foundSpace)
-	    {
-	        if (std::isspace(*it))
-	            foundSpace = true;
-	        else
-	            command += *it; // Add to command until space is found
-	    }
-	    else
-	        arg += *it; // Add to arg after space is found
-	}
 
 
-    
-	command = strToUpper(command);
-    result.push_back(command);
-	arg = removeCRLF(arg);
-    result.push_back(arg);
-
-    return result;
-}
-
-std::string cap(Server *server, Session *session, std::string rawline)
+std::string Command::cap(Server *server, Session *session, Message message)
 {
 	(void)server;
 	(void)session;
-	(void)rawline;
+	(void)message;
 	return("");
 }
 
-std::string	Command::pass(Server *server, Session *session, std::string rawline)
+std::string	Command::pass(Server *server, Session *session, Message message)
 {
-	std::vector<std::string> args = parserPASS(rawline);
 	
-	//Check if the correct command was called, yes I check a 2nd time
-	if(args[0] != "PASS" || args[1].empty() == true)
+	// //Check if the correct command was called, yes I check a 2nd time
+	// if(args[0] != "PASS" || args[1].empty() == true)
+	// {
+	// 	Debug::Warning("PASS should not be called, arg0: " + args[0] + " arg1 " + args[1] + "\n rawline: \n" + rawline);
+	// 	return ("");
+	// }
+	if(message.params.empty())
 	{
-		Debug::Warning("PASS should not be called, arg0: " + args[0] + " arg1 " + args[1] + "\n rawline: \n" + rawline);
-		return ("");
+		return(Error::ERR_NEEDMOREPARAMS_461(server, session, message));
 	}
 
 	if(session->getPassIsSet() == true)
@@ -85,39 +37,76 @@ std::string	Command::pass(Server *server, Session *session, std::string rawline)
 	
 
 	//Passwd check
-	if(server->checkPassword(args[1]) == false)
+	if(server->checkPassword(message.params[0]) == false)
 	{
 		return(Error::ERR_PASSWDMISMATCH_464(server, session));
 	}
 	else
 	{
 		session->setPassTrue();
-		return(Reply::RPL_WELCOME_001(server, session));
+		return("");
+		// return(Reply::RPL_WELCOME_001(server, session)); // FOR TEST
 	}
-	return("");
 }
 
-static std::vector<std::string> parserNICK(std::string const &rawline)
+static bool isAllowedNickCharacter(char const c)
 {
-	return(parserPASS(rawline));
-	// PASS Is parsed the same way than NICK
+	return (isalnum(c) || c == '[' || c == ']' || c == '{' || c == '}' || c == '\\' || c == '|' || c == '_' || c == '-');
 }
-std::string	Command::nick(Server *server, Session *session, std::string rawline)
-{
-	std::vector<std::string> args = parserNICK(rawline);
 
-	if(args[0] != "NICK" || args[1].empty() == true)
+std::string	Command::nick(Server *server, Session *session, Message message)
+{
+	if(session->getPassIsSet() == false)
+		return("");
+	if(session->getAuthenticated() == true)
+		return(Error::ERR_ALREADYREGISTRED_462(server,session));
+	if(message.params.empty())
+		return(Error::ERR_NEEDMOREPARAMS_461(server, session, message));
+	if(message.params[0].length() < 1 || message.params[0].length() > 9)
+		return(Error::ERR_ERRONEUSNICKNAME_432(server, session, message));
+	for(size_t i = 0; i < message.params[0].size(); i++)
 	{
-		Debug::Warning("NICK should not be called, arg0: " + args[0] + " arg1 " + args[1] + "\n rawline: \n" + rawline);
-		return ("");
+		if(!(isAllowedNickCharacter(message.params[0][i])))
+			return(Error::ERR_ERRONEUSNICKNAME_432(server, session, message));
 	}
-	//Check if nickname is valid format
-	//Check if nickname is already used capitalize it
-	//CHeck if nic
+	if(server->getSession(message.params[0]) != NULL)
+		return(Error::ERR_NICKNAMEINUSE_433(server, session, message));
+	session->setNickName(message.params[0]);
+	session->getNickNameIsSet();
+	if(session->authenticate())
+	{
+		return(	Reply::RPL_WELCOME_001(server,session,message) +\
+				Reply::RPL_YOURHOST_002(server,session,message) +\
+				Reply::RPL_CREATED_003(server,session,message) +\
+				Reply::RPL_MYINFO_004(server,session,message));
+	}
+	else
+		return("");
 }
 
-std::string	Command::user(Server *server, Session *session, std::string rawline)
+std::string	Command::user(Server *server, Session *session, Message message)
 {
-
+	if(session->getPassIsSet() == false)
+		return("");
+	if(session->getAuthenticated() == true)
+		return(Error::ERR_ALREADYREGISTRED_462(server,session));
+	if(message.params.empty() || (message.params.size() < 3 && (!(message.payload.empty()))) || (message.params.size() < 4 && (message.payload.empty())) )
+		return(Error::ERR_NEEDMOREPARAMS_461(server, session, message));
+	session->setUserName(message.params[0]);
+	session->getUserNameIsSet();
+	if(message.params.size() == 4)
+		session->setRealName(message.params[3]);
+	else
+		session->setRealName(message.payload);
+	session->getRealNameIsSet();
+	if(session->authenticate())
+	{
+		return(	Reply::RPL_WELCOME_001(server,session,message) +\
+				Reply::RPL_YOURHOST_002(server,session,message) +\
+				Reply::RPL_CREATED_003(server,session,message) +\
+				Reply::RPL_MYINFO_004(server,session,message));
+	}
+	else
+		return("");
 }
 // send(i, msg.c_str(), msg.length(), 0);
