@@ -16,4 +16,6 @@ namespace Command
 	std::string	pass(Server *server, Session *session, Message  message);
 	std::string	nick(Server *server, Session *session, Message  message);
 	std::string	user(Server *server, Session *session, Message  message);
+	std::string	ping(Server *server, Session *session, Message  message);
+	std::string	pong(Server *server, Session *session, Message  message);
 };
