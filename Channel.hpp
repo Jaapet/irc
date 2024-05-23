@@ -4,6 +4,8 @@
 # include <vector>
 # include <algorithm>
 
+# include "Session.hpp"
+
 class Channel
 {
 private :
@@ -17,8 +19,8 @@ private :
 	std::vector<std::string>	users;
 	std::vector<std::string>	operators;
 
-	void	remove_normal_user(Client &user);
-	void	remove_operator(Client &user);
+	void	remove_normal_user(Session &user);
+	void	remove_operator(Session &user);
 
 public :
 	Channel(const std::string &name);
