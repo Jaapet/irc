@@ -17,12 +17,17 @@ class Session
 {
 private:
 	Server const *_server;
-	
 
+	bool _authenticated;
+	bool _pass_is_set;
 	std::string _username;
+	bool _user_is_set;
 	std::string _nickname;
+	bool _nick_is_set;
 	std::string _realname;
+	bool _realname_is_set;
 
+	std::string channel;
 	//.. Add whatever you need
 
 public:
@@ -32,14 +37,40 @@ public:
 	Session(Server const *server_ptr);
 	~Session();
 
-	socklen_t getLenSocket(void) const
-		{return (sizeof(_address_socket));}
-	int const &getFdSocket(void) const
-		{return (this->_fd_socket);}
-	//DO YOUR OWN GETTERS
-	// ...
-	//
-	
+	//Getters
+		//Basic info
+		bool getAuthenticated(void) const
+			{return (this->_authenticated);}
+		bool getPassIsSet(void) const
+			{return (this->_pass_is_set);}
+		std::string const &getUserName(void) const
+			{return(this->_username);}
+		bool getUserNameIsSet(void) const
+			{return (this->_user_is_set);}
+		std::string const &getNickName(void) const
+			{return(this->_nickname);}
+		bool getNickNameIsSet(void) const
+			{return (this->_nick_is_set);}
+		std::string const &getRealName(void) const
+			{return(this->_realname);}
+		bool getRealNameIsSet(void) const
+			{return (this->_realname_is_set);}
+		//Socket info
+		socklen_t getLenSocket(void) const
+			{return (sizeof(_address_socket));}
+		int const &getFdSocket(void) const
+			{return (this->_fd_socket);}
+	//Setters
+	void setPassTrue(void)
+		{this->_pass_is_set = true;}
+	void setNickName(std::string const &nickname)
+		{this->_nickname = nickname; this->_nick_is_set = true;;}
+	void setUserName(std::string const &username)
+		{this->_username = username; this->_user_is_set = true;}
+	void setRealName(std::string const &realname)
+		{this->_realname = realname; this->_realname_is_set = true;}
+
+	bool authenticate(void); //Every time this method is call it check if everything is meet for completing the auth; then return the correct 4 REPL
 
 };
 

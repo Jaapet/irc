@@ -19,4 +19,8 @@ namespace Debug
 	void Warning(std::string const &msg);
 
 	void Error(std::string const &msg);
+
+	void Message(std::string const &msg, int session_fd);
+
+	void Reply(std::string const &repcode, int session_fd);
 }
