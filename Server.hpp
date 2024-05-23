@@ -109,6 +109,7 @@ public:
 		void killSession(int const session_fd);
 		Session *getSession(std::string const &nickname);
 		//Messages
+		std::vector<std::string>    splitBuffer(std::string const &str);
 		void parseMessage(const std::string &message, Message &outmessage);
 		std::string removeCRLF(std::string const &str);
 		std::string strToUpper(std::string const &str);
