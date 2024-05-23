@@ -191,25 +191,27 @@ void Server::handleConnections(void)
 						buffer[nbytes] = '\0';
 						Debug::Message(std::string(buffer), i);
 						
-						//For each commands in the buffer
-							// {
-								Message tmp_msg;
-								std::string outBuffer;
-								std::string inBuffer(buffer);
-								inBuffer = this->removeCRLF(inBuffer);
-								this->parseMessage(inBuffer, tmp_msg);
-								if(!(tmp_msg.command.empty()))
-								{
-									tmp_msg.command = this->strToUpper(tmp_msg.command);
-									
-									if(this->_commands[tmp_msg.command] != NULL)
-										outBuffer = this->_commands[tmp_msg.command](this, this->_sessions[i], tmp_msg);
-									else
-										outBuffer = "TOTOTOTO Command not found";
-									if(!(outBuffer.empty()))
-										send(i, outBuffer.c_str(), outBuffer.length(), MSG_NOSIGNAL);
-								}
-							// }
+						std::vector<std::string> inBuffer = this->splitBuffer(buffer);
+						std::string outBuffer;
+						
+						for(size_t j = 0; j < inBuffer.size() ; j++)
+						{
+							
+							Message tmp_msg;
+							// std::string inBuffer(buffer);
+							// inBuffer = this->removeCRLF(inBuffer);
+							this->parseMessage(inBuffer[j], tmp_msg);
+							if(!(tmp_msg.command.empty()))
+							{
+								tmp_msg.command = this->strToUpper(tmp_msg.command);
+								if(this->_commands[tmp_msg.command] != NULL)
+									outBuffer += this->_commands[tmp_msg.command](this, this->_sessions[i], tmp_msg);
+								else
+									outBuffer += "ADD HERE CORRECT REPLY COMMAND NOT FOUND";
+								if(!(outBuffer.empty()))
+									send(i, outBuffer.c_str(), outBuffer.length(), MSG_NOSIGNAL);
+							}
+						}
 						
 						
 						
@@ -372,4 +374,26 @@ std::string Server::getCurrentDate(void)
     // %S - second (00-60)
     std::strftime(dateString, sizeof(dateString), "%Y-%m-%d %H:%M:%S", localTime);
     return (dateString);
+}
+
+
+std::vector<std::string>    Server::splitBuffer(std::string const &str)
+{
+    std::string del = "\r\n";
+    std::string tmp2;
+    std::string tmp = str;
+    size_t  f = 4;
+    std::vector<std::string> com;
+
+    while (f != std::string::npos)
+    {
+        f = tmp.find(del);
+        tmp2 = tmp.substr(0, f);
+		if (!tmp2.empty())
+        	com.push_back(tmp2);
+        if (f == std::string::npos)
+            break;
+        tmp = tmp.substr(f + del.size(), tmp.size() - 1);
+    }
+    return (com);
 }

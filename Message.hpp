@@ -12,3 +12,5 @@ struct Message
 	Message();
 	void clear();
 };
+
+//sender PASS param1 param2 :payload payload

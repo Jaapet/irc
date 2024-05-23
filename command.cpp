@@ -24,18 +24,18 @@ std::string	Command::pass(Server *server, Session *session, Message message)
 	// 	Debug::Warning("PASS should not be called, arg0: " + args[0] + " arg1 " + args[1] + "\n rawline: \n" + rawline);
 	// 	return ("");
 	// }
+	
 	if(message.params.empty())
 	{
 		return(Error::ERR_NEEDMOREPARAMS_461(server, session, message));
 	}
-
 	if(session->getPassIsSet() == true)
 	{
 		return(Error::ERR_ALREADYREGISTRED_462(server, session));
 		// server->killSession(session->getFdSocket()); //Disconect the user ?
 	}
 	
-
+	
 	//Passwd check
 	if(server->checkPassword(message.params[0]) == false)
 	{
@@ -72,7 +72,6 @@ std::string	Command::nick(Server *server, Session *session, Message message)
 	if(server->getSession(message.params[0]) != NULL)
 		return(Error::ERR_NICKNAMEINUSE_433(server, session, message));
 	session->setNickName(message.params[0]);
-	session->getNickNameIsSet();
 	if(session->authenticate())
 	{
 		return(	Reply::RPL_WELCOME_001(server,session,message) +\
@@ -93,12 +92,10 @@ std::string	Command::user(Server *server, Session *session, Message message)
 	if(message.params.empty() || (message.params.size() < 3 && (!(message.payload.empty()))) || (message.params.size() < 4 && (message.payload.empty())) )
 		return(Error::ERR_NEEDMOREPARAMS_461(server, session, message));
 	session->setUserName(message.params[0]);
-	session->getUserNameIsSet();
 	if(message.params.size() == 4)
 		session->setRealName(message.params[3]);
 	else
 		session->setRealName(message.payload);
-	session->getRealNameIsSet();
 	if(session->authenticate())
 	{
 		return(	Reply::RPL_WELCOME_001(server,session,message) +\
