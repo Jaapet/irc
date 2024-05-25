@@ -11,6 +11,7 @@ Session::Session(Server const *server_ptr): _server(server_ptr), _username("*"),
 	this->_sendBuffer.clear();
 	this->_lastpong = 0;
 	this->_channel = NULL;
+	this->_away_status = "";
 }
 
 Session::~Session()

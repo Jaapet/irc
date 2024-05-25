@@ -166,20 +166,37 @@ std::string	Command::quit(Server *server, Session *session, Message  message)
 	return("");
 }
 
+std::string	Command::notice(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return ("");
+	// If message.params[0] == & OU #, alors on boucle sur tous les utilisateurs de ce channel pour send le message
+	if (!server->getSession(message.params[0]))
+		return ("");
+	std::string	msg = Command::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
+	//send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	server->getSession(message.params[0])->addSendBuffer(msg);
+	return ("");
+}
+
 std::string	Command::privmsg(Server *server, Session *session, Message  message)
 {
 	if(session->getAuthenticated() == false)
 		return ("");
 	if (message.params.size() > 1)
 		return (Error::ERR_TOOMENYTARGETS_407(server, session, message));
-	int fd = -1;
+	if (message.params.size() == 0)
+		return (Error::ERR_NORECIPIENT_411(server, session, message));
+	if (message.payload.empty())
+		return (Error::ERR_NOTEXTTOSNED_412(server, session, message));
 	// If message.params[0] == & OU #, alors on boucle sur tous les utilisateurs de ce channel pour send le message
-	if (server->getSession(message.params[0]))
-		fd = server->getSession(message.params[0])->getFdSocket();
-	if (fd == -1)
+	if (!server->getSession(message.params[0]))
 		return (Error::ERR_NOSUCHNICK_401(server, session, message));
+	if (session->getAwayStatus() != "")
+		return (Error::RPL_AWAY_301(server, session, message));
 	std::string	msg = Command::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
-	send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	//send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	server->getSession(message.params[0])->addSendBuffer(msg);
 	return ("");
 }
 
