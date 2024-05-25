@@ -17,8 +17,10 @@ namespace Utils
 	std::string getCurrentDate(void);
 
 	bool isAllowedNickCharacter(char const c);
-
-	void sendToChannel(Server *server, Session *session, Message message);
+	bool findChar(std::string &str, char &c);
+	bool findFlag(const std::string& str, char c);
+	void removeDuplicatesStr(std::vector<std::string>& vec);
+	void sendToChannel(Server *server, Channel *channel, std::string &msg, std::string &channelname_with_flags_from_msg);
 
 	std::string getUserPrefix(Server *server, Session *session);
 	std::string getServerPrefix(Server *server, Session *session, std::string rep_code);
