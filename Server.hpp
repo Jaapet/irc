@@ -47,6 +47,7 @@ private:
 	std::string _available_user_modes;
 	std::string _available_channel_modes;
 	std::string _creation_date;
+	std::string _op_password;
 
 	bool _should_i_end_this_suffering; //Bool set to true to kill the server
 	
@@ -89,6 +90,8 @@ public:
 			{return (this->_creation_date);}
 		bool getKill(void) const
 			{return (this->_should_i_end_this_suffering);}
+		std::string const &getOpPassword(void) const
+			{return (this->_op_password);}
 		//Socket
 		int	const &getFdSocket(void) const
 			{return (this->_fd_socket);}

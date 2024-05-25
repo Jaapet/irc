@@ -19,6 +19,7 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 	this->_creation_date = Utils::getCurrentDate();
 	Debug::Info("Persue the server to not commit suicide");
 	this->_should_i_end_this_suffering = false;
+	this->_op_password = "mimemamomou";
 
 	Debug::Info("Attempt to initialize " + this->getHostName() + " IRC server");
 	try
@@ -116,8 +117,9 @@ void Server::mapCommands(void)
 	this->_commands["USER"] = &(Command::user);
 	this->_commands["PING"] = &(Command::ping);
 	this->_commands["PONG"] = &(Command::pong);
-	
-	
+	this->_commands["QUIT"] = &(Command::quit);
+	this->_commands["PRIVMSG"] = &(Command::privmsg);
+	//this->_commands["ERROR"] = &(Command::error);
 }
 
 
@@ -170,13 +172,7 @@ void Server::handleConnections(void)
 					}
 				}
 				else // if its not a new client
-				{
-					if(!this->_sessions[i]->getSendBuffer().empty()) //if sendBuffer of the session is not empty
-					{
-						send(i, this->_sessions[i]->getSendBuffer().c_str(), this->_sessions[i]->getSendBuffer().length() ,MSG_NOSIGNAL);
-						this->_sessions[i]->getSendBuffer().clear();
-					}
-						
+				{		
 					int nbytes = recv(i, buffer, sizeof(buffer), 0);
 					if (nbytes <= 0)
 					{
@@ -214,13 +210,19 @@ void Server::handleConnections(void)
 							if(!(tmp_msg.command.empty()))
 							{
 								tmp_msg.command = Utils::strToUpper(tmp_msg.command);
-								if(this->_commands[tmp_msg.command] != NULL)
+								if(tmp_msg.command == "QUIT") // In case of using QUIT, the session will be deleted before the getting of _sendBuffer, avoid a segfault
+									this->_commands[tmp_msg.command](this, this->_sessions[i], tmp_msg);
+								else if(this->_commands[tmp_msg.command] != NULL)
 									this->_sessions[i]->getSendBuffer() += this->_commands[tmp_msg.command](this, this->_sessions[i], tmp_msg);
 								else
 									this->_sessions[i]->getSendBuffer() += "ADD HERE CORRECT REPLY COMMAND NOT FOUND";
 							}
-
 						}
+					}
+					if(this->_sessions[i] && !this->_sessions[i]->getSendBuffer().empty()) //if sendBuffer of the session is not empty
+					{
+						send(i, this->_sessions[i]->getSendBuffer().c_str(), this->_sessions[i]->getSendBuffer().length() ,MSG_NOSIGNAL);
+						this->_sessions[i]->getSendBuffer().clear();
 					}
 				}
 			}

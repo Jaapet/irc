@@ -49,6 +49,6 @@ std::string Reply:: RPL_MYINFO_004(Server *server, Session *session, Message mes
 	Debug::Reply("RPL_MYINFO(004)", session->getFdSocket());
 	
 	(void)message;
-	std::string msg = Reply::getPrefix(server, session, "004") + " " + server->getServerName() + " " + server->getVersion() + " " + server->getAvailableUserModes() + " " + server->getAvailableChannelModes() + Reply::endr; //Channel mode with a parameter ?
+	std::string msg = Reply::getPrefix(server, session, "004") + server->getServerName() + " " + server->getVersion() + " " + server->getAvailableUserModes() + " " + server->getAvailableChannelModes() + Reply::endr; //Channel mode with a parameter ?
 	return(msg);
 }

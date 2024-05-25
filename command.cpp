@@ -5,6 +5,12 @@
 #include "Message.hpp"
 #include <vector>
 
+std::string Command::getUserPrefix(Server *server, Session *session)
+{
+	std::string prefix;
+	prefix = ":" + session->getNickName() + "!" + session->getUserName() + "@" + server->getHostName() + " ";
+	return(prefix);
+}
 
 
 std::string Command::cap(Server *server, Session *session, Message message)
@@ -110,6 +116,72 @@ std::string	Command::user(Server *server, Session *session, Message message)
 }
 // send(i, msg.c_str(), msg.length(), 0);
 
+// send(i, msg.c_str(), msg.length(), 0);
+
+// std::string	Command::oper(Server *server, Session *session, Message  message)
+// {
+// 	if(session->getAuthenticated() == false)
+// 		return("");
+// 	if (message.params.size() != 2)
+// 		return(Error::ERR_NEEDMOREPARAMS_461(server,session,message));
+// 	else if (message.params[1].compare(server->getOpPassword()));
+// 		return (Error::ERR_PASSWDMISMATCH_464(server, session));
+// 	else if ()
+// 	{
+// 		/* code */
+// 	}
+	
+// }
+
+std::string	Command::error(Server *server, Session *session, Message  message)
+{
+	(void)server;
+	if(session->getAuthenticated() == false || message.payload.empty())
+		return("");
+	return("Error: " + message.payload + "\n");
+}
+
+std::string	Command::error_v2(Server *server, Session *session, Message  message)
+{
+	(void)server;
+	if(session->getAuthenticated() == false || message.payload.empty())
+		return("");
+	return("Error :" + Command::quit(server, session, message) + Reply::endr);
+}
+
+std::string	Command::quit(Server *server, Session *session, Message  message)
+{
+	server->killSession(session->getFdSocket());
+	
+	Channel *tmp_chan = session->getChannel();
+	if(tmp_chan)
+	{
+		std::string msg = ":" +session->getNickName() + " !d@" + server->getHostName() + "QUIT :" + "Quit: " + message.payload + Reply::endr; // A CHECK
+		std::vector<std::string> lst_user = tmp_chan->get_users();
+		for(size_t i = 0; i < lst_user.size(); i++)
+		{
+			server->getSession(lst_user[i])->addSendBuffer(msg);
+		}
+	}
+	return("");
+}
+
+std::string	Command::privmsg(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return ("");
+	if (message.params.size() > 1)
+		return (Error::ERR_TOOMENYTARGETS_407(server, session, message));
+	int fd = -1;
+	// If message.params[0] == & OU #, alors on boucle sur tous les utilisateurs de ce channel pour send le message
+	if (server->getSession(message.params[0]))
+		fd = server->getSession(message.params[0])->getFdSocket();
+	if (fd == -1)
+		return (Error::ERR_NOSUCHNICK_401(server, session, message));
+	std::string	msg = Command::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
+	send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	return ("");
+}
 
 //Only from the client to the server
 std::string	Command::ping(Server *server, Session *session, Message  message)
