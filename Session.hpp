@@ -30,6 +30,7 @@ private:
 	std::string _sendBuffer;
 	bool		_waitpong;
 	std::time_t _lastpong;
+	bool		_is_op;
 	//.. Add whatever you need
 
 public:
@@ -59,6 +60,8 @@ public:
 			{return (this->_realname_is_set);}
 		bool getWaitPong(void)
 			{return(this->_waitpong);}
+		bool getIsOp(void)
+			{return(this->_is_op);}
 		//Socket info
 		socklen_t getLenSocket(void) const
 			{return (sizeof(_address_socket));}

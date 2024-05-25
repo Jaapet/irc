@@ -13,4 +13,7 @@ namespace Error
 	std::string ERR_NEEDMOREPARAMS_461(Server *server, Session *session, Message message);
 	std::string ERR_ALREADYREGISTRED_462(Server *server, Session *session);
 	std::string ERR_PASSWDMISMATCH_464(Server *server, Session *session);
+	std::string ERR_CANNOTSENDTICHAN_404(Server *server, Session *session, Message message);
+	std::string ERR_NOSUCHNICK_401(Server *server, Session *session, Message message);
+	std::string ERR_TOOMENYTARGETS_407(Server *server, Session *session, Message message);
 };
