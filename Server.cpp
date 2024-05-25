@@ -1,18 +1,22 @@
 #include "Server.hpp"
 #include "Session.hpp"
 #include "Message.hpp"
+#include <fcntl.h>
 #include <cstring>
 #include <ctime>
+
 //CONSTRUCTOR//////////////////////////////////////////////////
 Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(hostname), _password(pwd), _port(port) 
 {
 	//Init
+	this->_select_timeout.tv_usec = 100000;
+
 	this->_servername = "PEPPA_IRC";
 	this->_networkname = "NETWORK_NAME";
 	this->_version = "1234";
 	this->_available_user_modes = "AVAILABLE_USER_MODES";
 	this->_available_channel_modes = "AVAILABLE_CHANNEL_MODES";
-	this->_creation_date = this->getCurrentDate();
+	this->_creation_date = Utils::getCurrentDate();
 	Debug::Info("Persue the server to not commit suicide");
 	this->_should_i_end_this_suffering = false;
 
@@ -25,7 +29,7 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 		this->launchListen();
 		this->mapCommands();
 		this->initSessionsFds();
-		Debug::Success("Launching of " + this->getHostName() + " IRC server was sucessfull " + this->getCurrentDate());
+		Debug::Success("Launching of " + this->getHostName() + " IRC server was sucessfull " + Utils::getCurrentDate());
 	}
 	catch(const std::exception& e)
 	{
@@ -124,7 +128,7 @@ void Server::handleConnections(void)
 	while(!(this->getKill()))
 	{
 		session_fd_cpy = this->_sessions_fd;
-		if(select(fd_max + 1, &session_fd_cpy, NULL, NULL, NULL) == -1) //CHANGE NULL TO HANDLE TIMEOUT
+		if(select(fd_max + 1, &session_fd_cpy, NULL, NULL, &this->_select_timeout) == -1) //CHANGE NULL TO HANDLE TIMEOUT
 		{
 			throw(Server::SelectCallError()); 
 		}
@@ -157,16 +161,20 @@ void Server::handleConnections(void)
 							Debug::Error("Fatal error, sessions fd duplicated: " + tmp_sess->_fd_socket);
 							exit(1);
 						}
+						this->setNonBlockingFd(tmp_sess->getFdSocket());
 						this->_sessions[tmp_sess->_fd_socket] = tmp_sess;
 
 						Debug::Info("New connection from " + std::string(inet_ntoa(tmp_sess->_address_socket.sin_addr)));
-						//Clear variables for new cnx (Maybe not mandatory, to test)
-						// tmp_sess = NULL;
-						// tmp_size = 0;
 					}
 				}
 				else // if its not a new client
 				{
+					if(!this->_sessions[i]->getSendBuffer().empty()) //if sendBuffer of the session is not empty
+					{
+						send(i, this->_sessions[i]->getSendBuffer().c_str(), this->_sessions[i]->getSendBuffer().length() ,MSG_NOSIGNAL);
+						this->_sessions[i]->getSendBuffer().clear();
+					}
+						
 					int nbytes = recv(i, buffer, sizeof(buffer), 0);
 					if (nbytes <= 0)
 					{
@@ -203,29 +211,14 @@ void Server::handleConnections(void)
 							this->parseMessage(inBuffer[j], tmp_msg);
 							if(!(tmp_msg.command.empty()))
 							{
-								tmp_msg.command = this->strToUpper(tmp_msg.command);
+								tmp_msg.command = Utils::strToUpper(tmp_msg.command);
 								if(this->_commands[tmp_msg.command] != NULL)
-									outBuffer += this->_commands[tmp_msg.command](this, this->_sessions[i], tmp_msg);
+									this->_sessions[i]->getSendBuffer() += this->_commands[tmp_msg.command](this, this->_sessions[i], tmp_msg);
 								else
-									outBuffer += "ADD HERE CORRECT REPLY COMMAND NOT FOUND";
-								if(!(outBuffer.empty()))
-									send(i, outBuffer.c_str(), outBuffer.length(), MSG_NOSIGNAL);
+									this->_sessions[i]->getSendBuffer() += "ADD HERE CORRECT REPLY COMMAND NOT FOUND";
 							}
+
 						}
-						
-						
-						
-						
-						//TESTS
-						
-
-
-						//CMD FROM HEXCHAT
-						// CAP //Ignore 	
-						// NICK
-						// USER
-						// PASS
-						// QUIT
 					}
 				}
 			}
@@ -233,12 +226,6 @@ void Server::handleConnections(void)
 	}
 
 }
-
-
-
-
-
-
 
 //PUBLIC METHODS//////////////////////////////////////////////////////
 void Server::killSession(int const session_fd)
@@ -315,31 +302,17 @@ void Server::parseMessage(const std::string &message, Message &outmessage)
     }
 }
 
-
-std::string Server::removeCRLF(std::string const &str)
+void Server::setNonBlockingFd(int fd) 
 {
-	std::string out = str;
-
-	if (!out.empty() && (out[out.size() - 1] == '\n' || out[out.size() - 1] == '\r')) {
-        out.erase(out.size() - 1);
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1) {
+        throw std::runtime_error("fcntl F_GETFL failed");
     }
-    if (!out.empty() && (out[out.size() - 1] == '\n' || out[out.size() - 1] == '\r')) {
-        out.erase(out.size() - 1);
+    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+        throw std::runtime_error("fcntl F_SETFL failed");
     }
-	return(out);
 }
 
-std::string Server::strToUpper(std::string const &str)
-{
-	std::string out = str;
-
-	for (std::string::iterator it = out.begin(); it != out.end(); ++it) 
-	{
-		*it = std::toupper(*it);
-    }
-
-	return(out);
-}
 
 Session *Server::getSession(std::string const &nickname)
 {
@@ -347,7 +320,7 @@ Session *Server::getSession(std::string const &nickname)
     Session* foundSession = NULL;
 	for (it = this->_sessions.begin(); it != this->_sessions.end(); ++it) 
 	{
-    	if (this->strToUpper(it->second->getNickName()) == this->strToUpper(nickname)) 
+    	if (Utils::strToUpper(it->second->getNickName()) == Utils::strToUpper(nickname)) 
 		{
             foundSession = it->second;
             break;
@@ -356,25 +329,6 @@ Session *Server::getSession(std::string const &nickname)
 	return(foundSession);
 }
 
-std::string Server::getCurrentDate(void)
-{
-	// Get the current time as a time_t object
-    std::time_t currentTime = std::time(NULL);
-    // Convert to local time representation
-    std::tm* localTime = std::localtime(&currentTime);
-    // Buffer to hold the formatted date string
-    char dateString[100];
-    // Format the date into a human-readable string
-    // Format specifiers:
-    // %Y - year with century
-    // %m - month (01-12)
-    // %d - day of the month (01-31)
-    // %H - hour (00-23)
-    // %M - minute (00-59)
-    // %S - second (00-60)
-    std::strftime(dateString, sizeof(dateString), "%Y-%m-%d %H:%M:%S", localTime);
-    return (dateString);
-}
 
 
 std::vector<std::string>    Server::splitBuffer(std::string const &str)

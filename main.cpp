@@ -20,5 +20,5 @@ int main(int argc, char **argv)
 	}
 
 	Server irc(std::string(hostname), pwd , port);
-	std::cout << "test0" << std::endl;
+	
 }

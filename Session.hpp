@@ -27,7 +27,9 @@ private:
 	std::string _realname;
 	bool _realname_is_set;
 
-	std::string channel;
+	// std::string channel;
+
+	std::string _sendBuffer;
 	//.. Add whatever you need
 
 public:
@@ -60,6 +62,8 @@ public:
 			{return (sizeof(_address_socket));}
 		int const &getFdSocket(void) const
 			{return (this->_fd_socket);}
+		std::string &getSendBuffer(void)
+			{return(this->_sendBuffer);}
 	//Setters
 	void setPassTrue(void)
 		{this->_pass_is_set = true;}

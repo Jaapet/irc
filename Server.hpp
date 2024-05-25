@@ -17,6 +17,7 @@
 
 #include "command.hpp"
 #include "debug.hpp"
+#include "utils.hpp"
 
 #define BUFFER_SIZE  512
 #define BACKLOG  10
@@ -35,6 +36,7 @@ private:
 
 	// Not used outside of server class no need for getters
 	fd_set _sessions_fd;
+	timeval _select_timeout;
 	//
 	std::string _hostname; // hostname of the irc server
 	std::string _password; // password to join the server, no getter for obvious reasons
@@ -104,6 +106,7 @@ public:
 
 	//Methods
 		//Sessions
+		void setNonBlockingFd(int fd);
 		bool checkPassword(std::string passwordToCheck) const
 			{return (passwordToCheck == this->_password);}
 		void killSession(int const session_fd);
@@ -111,8 +114,4 @@ public:
 		//Messages
 		std::vector<std::string>    splitBuffer(std::string const &str);
 		void parseMessage(const std::string &message, Message &outmessage);
-		std::string removeCRLF(std::string const &str);
-		std::string strToUpper(std::string const &str);
-		std::string getCurrentDate(void);
-		
 };
