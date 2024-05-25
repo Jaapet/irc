@@ -114,6 +114,8 @@ void Server::mapCommands(void)
 	this->_commands["PASS"] = &(Command::pass);
 	this->_commands["NICK"] = &(Command::nick);
 	this->_commands["USER"] = &(Command::user);
+	this->_commands["PING"] = &(Command::ping);
+	this->_commands["PONG"] = &(Command::pong);
 	
 	
 }
@@ -232,6 +234,11 @@ void Server::killSession(int const session_fd)
 {
 	std::string tmp((inet_ntoa(this->_sessions[session_fd]->_address_socket.sin_addr)));
 
+	if(shutdown(session_fd, SHUT_RDWR) == -1)
+	{
+		Debug::Error("Cannot shutdown session: " + session_fd);
+		return;
+	}
 	delete (this->_sessions[session_fd]);
 	this->_sessions[session_fd] = NULL;
 	close(session_fd);

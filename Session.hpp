@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include "Server.hpp"
+#include <ctime>
 
 class Server;
 
@@ -26,10 +27,9 @@ private:
 	bool _nick_is_set;
 	std::string _realname;
 	bool _realname_is_set;
-
-	// std::string channel;
-
 	std::string _sendBuffer;
+	bool		_waitpong;
+	std::time_t _lastpong;
 	//.. Add whatever you need
 
 public:
@@ -57,6 +57,8 @@ public:
 			{return(this->_realname);}
 		bool getRealNameIsSet(void) const
 			{return (this->_realname_is_set);}
+		bool getWaitPong(void)
+			{return(this->_waitpong);}
 		//Socket info
 		socklen_t getLenSocket(void) const
 			{return (sizeof(_address_socket));}
@@ -73,9 +75,12 @@ public:
 		{this->_username = username; this->_user_is_set = true;}
 	void setRealName(std::string const &realname)
 		{this->_realname = realname; this->_realname_is_set = true;}
+	void setWaitPong(void)
+		{this->_waitpong = true;}
 
 	bool authenticate(void); //Every time this method is call it check if everything is meet for completing the auth; then return the correct 4 REPL
-
+	void newPong()
+		{this->_lastpong = std::time(NULL); this->_waitpong = false;}
 };
 
 

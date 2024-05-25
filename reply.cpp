@@ -10,6 +10,16 @@ std::string Reply::getPrefix(Server *server, Session *session, std::string rep_c
 	return(prefix);
 }
 
+std::string Reply::PING_SERVER(Server *server, Session *session, Message message)
+{
+	Debug::Message("PING TO CLIENT", server->getFdSocket());
+	
+	(void)message;
+	session->setWaitPong();
+	std::string msg = ":" + server->getHostName() + " PING :" + session->getNickName() + Reply::endr;
+	return(msg);
+}
+
 std::string Reply::RPL_WELCOME_001(Server *server, Session *session, Message message)
 {
 	Debug::Reply("RPL_WELCOME(001)", session->getFdSocket());

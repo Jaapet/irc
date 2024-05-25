@@ -77,7 +77,8 @@ std::string	Command::nick(Server *server, Session *session, Message message)
 		return(	Reply::RPL_WELCOME_001(server,session,message) +\
 				Reply::RPL_YOURHOST_002(server,session,message) +\
 				Reply::RPL_CREATED_003(server,session,message) +\
-				Reply::RPL_MYINFO_004(server,session,message));
+				Reply::RPL_MYINFO_004(server,session,message) +\
+				Reply::PING_SERVER(server,session,message));
 	}
 	else
 		return("");
@@ -101,9 +102,45 @@ std::string	Command::user(Server *server, Session *session, Message message)
 		return(	Reply::RPL_WELCOME_001(server,session,message) +\
 				Reply::RPL_YOURHOST_002(server,session,message) +\
 				Reply::RPL_CREATED_003(server,session,message) +\
-				Reply::RPL_MYINFO_004(server,session,message));
+				Reply::RPL_MYINFO_004(server,session,message) +\
+				Reply::PING_SERVER(server,session,message));
 	}
 	else
 		return("");
 }
 // send(i, msg.c_str(), msg.length(), 0);
+
+
+//Only from the client to the server
+std::string	Command::ping(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return("");
+	if(message.payload.empty())
+		return(Error::ERR_NEEDMOREPARAMS_461(server,session,message));
+	//Reply Pong
+	return(":" + server->getHostName() + " PONG :" + message.payload + Reply::endr);
+
+}
+//Only from the client to the server
+std::string	Command::pong(Server *server, Session *session, Message  message)
+{
+	(void)server;
+	if(session->getAuthenticated() == false)
+	{
+		Debug::Warning("Received an unexpected PONG while session not auth");
+		return("");
+	}
+	if(session->getWaitPong() == true && message.payload == session->getNickName())
+	{
+		Debug::Info("Received a correct pong while waiting it");
+		session->newPong();
+		return("");
+	}
+	else
+	{
+		Debug::Warning("Received an unexpected PONG while not waiting it or the token is not valid");
+		return("");
+	}
+	
+}
