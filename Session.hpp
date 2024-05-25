@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include "Server.hpp"
+#include "Channel.hpp"
 
 class Server;
 
@@ -27,7 +28,7 @@ private:
 	std::string _realname;
 	bool _realname_is_set;
 
-	std::string channel;
+	Channel	*channel;
 	//.. Add whatever you need
 
 public:
@@ -71,6 +72,15 @@ public:
 		{this->_realname = realname; this->_realname_is_set = true;}
 
 	bool authenticate(void); //Every time this method is call it check if everything is meet for completing the auth; then return the correct 4 REPL
+
+
+	int							join_chan(Channel &chan, std::string &pass); //JOIN ; 0 if ok, 1 if not invited, 2 if already, 3 if full
+	bool						quit_chan(Channel &chan); //PART ; KICK ; false if user not in chan
+	void						set_topic(Channel &chan, std::string &topic); //TOPIC ; if empty string, clears the topic
+	std::string					get_topic(Channel &chan); //TOPIC
+	std::vector<std::string>	names_chan(Channel &chan); //NAMES
+	void						get_invited(Channel &chan); //INVITE
+	void						invite(Session &user, Channel &chan); //INVITE
 
 };
 

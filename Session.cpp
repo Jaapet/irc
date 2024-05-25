@@ -25,3 +25,38 @@ bool Session::authenticate(void)
 
 	
 }
+
+int	Session::join_chan(Channel &chan, std::string &pass)
+{
+	return (chan.add_user(this->_nickname));
+}
+
+bool	Session::quit_chan(Channel &chan)
+{
+	return (chan.rm_user(this->_nickname));
+}
+
+void	Session::set_topic(Channel &chan, std::string &topic)
+{
+	chan.set_topic(topic);
+}
+
+std::string	Session::get_topic(Channel &chan)
+{
+	return (chan.get_topic());
+}
+
+std::vector<std::string>	Session::names_chan(Channel &chan)
+{
+	return (chan.get_users());
+}
+
+void	Session::get_invited(Channel &chan)
+{
+	chan.invite_user(this->_nickname);
+}
+
+void	Session::invite(Session &user, Channel &chan)
+{
+	user.get_invited(chan);
+}
