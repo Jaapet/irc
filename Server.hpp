@@ -35,7 +35,8 @@ private:
 	struct sockaddr_in _address_socket; // (Server) struct who contain socket info
 
 	// Not used outside of server class no need for getters
-	fd_set _sessions_fd;
+	fd_set _read_sessions_fd;
+	fd_set _write_sessions_fd;
 	timeval _select_timeout;
 	//
 	std::string _hostname; // hostname of the irc server
@@ -63,7 +64,10 @@ private:
 	void initSessionsFds(void);
 	void mapCommands(void);
 	void handleConnections(void);
-
+	void handleNewSession(int &fd_max);
+	void handleReadEvents(int cur_fd);
+	void executeCommands(std::vector<std::string> command_to_execute, int cur_fd);
+	void handleWriteEvents( int cur_fd);
 	
 public:
 	Server(std::string hostname, std::string pwd, uint16_t port);

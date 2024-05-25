@@ -51,41 +51,41 @@ std::string Error::ERR_CANNOTSENDTICHAN_404(Server *server, Session *session, Me
 
 std::string Error::ERR_NOSUCHNICK_401(Server *server, Session *session, Message message)
 {
-	Debug::Reply("ERR_NOSUCHNICK_401", session->getFdSocket());
+	Debug::Reply("ERR_NOSUCHNICK(401)", session->getFdSocket());
 
-	std::string msg = Utils::getServerPrefix(server, session, "401") + session->getNickName() + " " + message.params[0] + ":No suck nock/channel" + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "401") + session->getNickName() + " " + message.params[0] + ":No such nick/channel" + Reply::endr;
 	return(msg);
 }
 
 std::string Error::ERR_TOOMENYTARGETS_407(Server *server, Session *session, Message message)
 {
-	Debug::Reply("ERR_NOSUCHNICK_401", session->getFdSocket());
+	Debug::Reply("ERR_TOOMENYTARGETS(407)", session->getFdSocket());
 
-	std::string msg = Utils::getServerPrefix(server, session, "401") + session->getNickName() + " " + message.params[0] + ":No suck nock/channel" + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "407") + session->getNickName() + " " + message.params[0] + "Too many target, care monda" + Reply::endr;
 	return(msg);
 }
 
 std::string Error::ERR_NORECIPIENT_411(Server *server, Session *session, Message message)
 {
-	Debug::Reply("ERR_NORECIPIENT_411", session->getFdSocket());
+	Debug::Reply("ERR_NORECIPIENT(411)", session->getFdSocket());
 
-	std::string msg = Reply::getPrefix(server, session, "411") + session->getNickName() + " :No recipient given (" + message.command + ")" + Reply::endr;
+	std::string msg =Utils::getServerPrefix(server, session, "411") + session->getNickName() + " :No recipient given (" + message.command + ")" + Reply::endr;
 	return(msg);
 }
 
 std::string Error::ERR_NOTEXTTOSNED_412(Server *server, Session *session, Message message)
 {
-	Debug::Reply("ERR_NOTEXTTOSNED_412", session->getFdSocket());
+	Debug::Reply("ERR_NOTEXTTOSNED(412)", session->getFdSocket());
 
 	(void)message;
-	std::string msg = Reply::getPrefix(server, session, "412") + session->getNickName() + " :No text to send" + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "412") + session->getNickName() + " :No text to send" + Reply::endr;
 	return(msg);
 }
 
 std::string Error::RPL_AWAY_301(Server *server, Session *session, Message message)
 {
-	Debug::Reply("ERR_NOTEXTTOSNED_301", session->getFdSocket());
+	Debug::Reply("ERR_NOTEXTTOSNED(301)", session->getFdSocket());
 
-	std::string msg = Reply::getPrefix(server, session, "301") + session->getNickName() + " " + message.params[0] + " :" + session->getAwayStatus() + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "301") + session->getNickName() + " " + message.params[0] + " :" + session->getAwayStatus() + Reply::endr;
 	return(msg);
 }

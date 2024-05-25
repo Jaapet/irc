@@ -25,7 +25,6 @@ std::string	Command::pass(Server *server, Session *session, Message message)
 	// 	Debug::Warning("PASS should not be called, arg0: " + args[0] + " arg1 " + args[1] + "\n rawline: \n" + rawline);
 	// 	return ("");
 	// }
-	
 	if(message.params.empty())
 	{
 		return(Error::ERR_NEEDMOREPARAMS_461(server, session, message));
@@ -54,6 +53,7 @@ std::string	Command::pass(Server *server, Session *session, Message message)
 
 std::string	Command::nick(Server *server, Session *session, Message message)
 {
+	
 	if(session->getPassIsSet() == false)
 		return("");
 	if(session->getAuthenticated() == true)
@@ -165,7 +165,7 @@ std::string	Command::notice(Server *server, Session *session, Message  message)
 	// If message.params[0] == & OU #, alors on boucle sur tous les utilisateurs de ce channel pour send le message
 	if (!server->getSession(message.params[0]))
 		return ("");
-	std::string	msg = Command::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
+	std::string	msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
 	//send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
 	server->getSession(message.params[0])->addSendBuffer(msg);
 	return ("");
@@ -173,21 +173,25 @@ std::string	Command::notice(Server *server, Session *session, Message  message)
 
 std::string	Command::privmsg(Server *server, Session *session, Message  message)
 {
+	std::string msg;
 	if(session->getAuthenticated() == false)
 		return ("");
-	if (message.params.size() > 1)
+	if (message.params.size() > 2)
 		return (Error::ERR_TOOMENYTARGETS_407(server, session, message));
 	if (message.params.size() == 0)
 		return (Error::ERR_NORECIPIENT_411(server, session, message));
-	if (message.payload.empty())
+	if (message.payload.empty() && message.params.size() == 1)
 		return (Error::ERR_NOTEXTTOSNED_412(server, session, message));
 	// If message.params[0] == & OU #, alors on boucle sur tous les utilisateurs de ce channel pour send le message
 	if (!server->getSession(message.params[0]))
 		return (Error::ERR_NOSUCHNICK_401(server, session, message));
 	if (session->getAwayStatus() != "")
 		return (Error::RPL_AWAY_301(server, session, message));
-	std::string	msg = Command::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
-	//send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	if(!message.payload.empty())
+		msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
+	else if(!message.params[1].empty())
+		msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.params[1] + Reply::endr; //Add for more natural command line
+	
 	server->getSession(message.params[0])->addSendBuffer(msg);
 	return ("");
 }
