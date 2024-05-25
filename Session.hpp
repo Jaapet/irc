@@ -12,6 +12,8 @@
 #include "Server.hpp"
 #include <ctime>
 
+class Channel;
+
 class Server;
 
 class Session
@@ -30,7 +32,8 @@ private:
 	std::string _sendBuffer;
 	bool		_waitpong;
 	std::time_t _lastpong;
-	bool		_is_op;
+
+	Channel *_channel;
 	//.. Add whatever you need
 
 public:
@@ -60,8 +63,8 @@ public:
 			{return (this->_realname_is_set);}
 		bool getWaitPong(void)
 			{return(this->_waitpong);}
-		bool getIsOp(void)
-			{return(this->_is_op);}
+		Channel *getChannel(void)
+			{return(this->_channel);}
 		//Socket info
 		socklen_t getLenSocket(void) const
 			{return (sizeof(_address_socket));}
@@ -84,6 +87,10 @@ public:
 	bool authenticate(void); //Every time this method is call it check if everything is meet for completing the auth; then return the correct 4 REPL
 	void newPong()
 		{this->_lastpong = std::time(NULL); this->_waitpong = false;}
+	void addSendBuffer(std::string &str)
+	{
+		this->_sendBuffer += str;
+	}
 };
 
 

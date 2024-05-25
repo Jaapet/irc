@@ -6,6 +6,8 @@
 
 # include "Session.hpp"
 
+class Session;
+
 class Channel
 {
 private :

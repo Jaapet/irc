@@ -152,7 +152,18 @@ std::string	Command::error_v2(Server *server, Session *session, Message  message
 std::string	Command::quit(Server *server, Session *session, Message  message)
 {
 	server->killSession(session->getFdSocket());
-	return(":" +session->getNickName() + " !d@" + server->getHostName() + "QUIT :" + "Quit: " + message.payload + Reply::endr);
+	
+	Channel *tmp_chan = session->getChannel();
+	if(tmp_chan)
+	{
+		std::string msg = ":" +session->getNickName() + " !d@" + server->getHostName() + "QUIT :" + "Quit: " + message.payload + Reply::endr; // A CHECK
+		std::vector<std::string> lst_user = tmp_chan->get_users();
+		for(size_t i = 0; i < lst_user.size(); i++)
+		{
+			server->getSession(lst_user[i])->addSendBuffer(msg);
+		}
+	}
+	return("");
 }
 
 std::string	Command::privmsg(Server *server, Session *session, Message  message)
