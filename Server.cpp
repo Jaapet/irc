@@ -19,8 +19,7 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 	this->_creation_date = Utils::getCurrentDate();
 	Debug::Info("Persue the server to not commit suicide");
 	this->_should_i_end_this_suffering = false;
-	this->_op_password = "mimemamomou";
-
+	
 	Debug::Info("Attempt to initialize " + this->getHostName() + " IRC server");
 	try
 	{
