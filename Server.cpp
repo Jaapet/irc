@@ -118,6 +118,7 @@ void Server::mapCommands(void)
 	this->_commands["PONG"] = &(Command::pong);
 	this->_commands["QUIT"] = &(Command::quit);
 	this->_commands["PRIVMSG"] = &(Command::privmsg);
+	this->_commands["NOTICE"] = &(Command::notice);
 	//this->_commands["ERROR"] = &(Command::error);
 }
 

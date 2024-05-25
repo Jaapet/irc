@@ -64,3 +64,28 @@ std::string Error::ERR_TOOMENYTARGETS_407(Server *server, Session *session, Mess
 	std::string msg = Utils::getServerPrefix(server, session, "401") + session->getNickName() + " " + message.params[0] + ":No suck nock/channel" + Reply::endr;
 	return(msg);
 }
+
+std::string Error::ERR_NORECIPIENT_411(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NORECIPIENT_411", session->getFdSocket());
+
+	std::string msg = Reply::getPrefix(server, session, "411") + session->getNickName() + " :No recipient given (" + message.command + ")" + Reply::endr;
+	return(msg);
+}
+
+std::string Error::ERR_NOTEXTTOSNED_412(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOTEXTTOSNED_412", session->getFdSocket());
+
+	(void)message;
+	std::string msg = Reply::getPrefix(server, session, "412") + session->getNickName() + " :No text to send" + Reply::endr;
+	return(msg);
+}
+
+std::string Error::RPL_AWAY_301(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOTEXTTOSNED_301", session->getFdSocket());
+
+	std::string msg = Reply::getPrefix(server, session, "301") + session->getNickName() + " " + message.params[0] + " :" + session->getAwayStatus() + Reply::endr;
+	return(msg);
+}

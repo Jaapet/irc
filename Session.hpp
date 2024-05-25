@@ -32,6 +32,7 @@ private:
 	std::string _sendBuffer;
 	bool		_waitpong;
 	std::time_t _lastpong;
+	std::string	_away_status;
 
 	Channel *_channel;
 	//.. Add whatever you need
@@ -45,6 +46,8 @@ public:
 
 	//Getters
 		//Basic info
+		std::string	const getAwayStatus(void) const
+			{return (this->_away_status);}
 		bool getAuthenticated(void) const
 			{return (this->_authenticated);}
 		bool getPassIsSet(void) const
