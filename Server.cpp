@@ -15,6 +15,7 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 	this->_creation_date = this->getCurrentDate();
 	Debug::Info("Persue the server to not commit suicide");
 	this->_should_i_end_this_suffering = false;
+	this->_op_password = "mimemamomou";
 
 	Debug::Info("Attempt to initialize " + this->getHostName() + " IRC server");
 	try
@@ -112,8 +113,9 @@ void Server::mapCommands(void)
 	this->_commands["USER"] = &(Command::user);
 	this->_commands["PING"] = &(Command::ping);
 	this->_commands["PONG"] = &(Command::pong);
-	
-	
+	this->_commands["QUIT"] = &(Command::quit);
+	this->_commands["PRIVMSG"] = &(Command::privmsg);
+	//this->_commands["ERROR"] = &(Command::error);
 }
 
 

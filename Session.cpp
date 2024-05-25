@@ -9,6 +9,7 @@ Session::Session(Server const *server_ptr): _server(server_ptr), _username("*"),
 	this->_realname_is_set = false;
 	this->_user_is_set = false;
 	this->_lastpong = 0;
+	this->_is_op = false;
 }
 
 Session::~Session()
