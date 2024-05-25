@@ -24,5 +24,6 @@ namespace Command
 	std::string	error(Server *server, Session *session, Message  message);
 	std::string	error_v2(Server *server, Session *session, Message  message);
 	std::string	privmsg(Server *server, Session *session, Message  message);
+	std::string	notice(Server *server, Session *session, Message  message);
 	//std::string	oper(Server *server, Session *session, Message  message);
 };
