@@ -5,12 +5,7 @@
 #include "Message.hpp"
 #include <vector>
 
-std::string Command::getUserPrefix(Server *server, Session *session)
-{
-	std::string prefix;
-	prefix = ":" + session->getNickName() + "!" + session->getUserName() + "@" + server->getHostName() + " ";
-	return(prefix);
-}
+
 
 
 std::string Command::cap(Server *server, Session *session, Message message)
@@ -55,10 +50,7 @@ std::string	Command::pass(Server *server, Session *session, Message message)
 	}
 }
 
-static bool isAllowedNickCharacter(char const c)
-{
-	return (isalnum(c) || c == '[' || c == ']' || c == '{' || c == '}' || c == '\\' || c == '|' || c == '_' || c == '-');
-}
+
 
 std::string	Command::nick(Server *server, Session *session, Message message)
 {
@@ -72,7 +64,7 @@ std::string	Command::nick(Server *server, Session *session, Message message)
 		return(Error::ERR_ERRONEUSNICKNAME_432(server, session, message));
 	for(size_t i = 0; i < message.params[0].size(); i++)
 	{
-		if(!(isAllowedNickCharacter(message.params[0][i])))
+		if(!(Utils::isAllowedNickCharacter(message.params[0][i])))
 			return(Error::ERR_ERRONEUSNICKNAME_432(server, session, message));
 	}
 	if(server->getSession(message.params[0]) != NULL)
@@ -178,7 +170,7 @@ std::string	Command::privmsg(Server *server, Session *session, Message  message)
 		fd = server->getSession(message.params[0])->getFdSocket();
 	if (fd == -1)
 		return (Error::ERR_NOSUCHNICK_401(server, session, message));
-	std::string	msg = Command::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
+	std::string	msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
 	send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
 	return ("");
 }

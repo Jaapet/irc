@@ -44,3 +44,22 @@ std::string Utils::getCurrentDate(void)
     std::strftime(dateString, sizeof(dateString), "%Y-%m-%d %H:%M:%S", localTime);
     return (dateString);
 }
+
+bool Utils::isAllowedNickCharacter(char const c)
+{
+	return (isalnum(c) || c == '[' || c == ']' || c == '{' || c == '}' || c == '\\' || c == '|' || c == '_' || c == '-');
+}
+
+std::string Utils::getUserPrefix(Server *server, Session *session)
+{
+	std::string prefix;
+	prefix = ":" + session->getNickName() + "!" + session->getUserName() + "@" + server->getHostName() + " ";
+	return(prefix);
+}
+
+std::string Utils::getServerPrefix(Server *server, Session *session, std::string rep_code)
+{
+	std::string prefix;
+	prefix = ":" + server->getHostName() + " " + rep_code + " " + session->getNickName() + " ";
+	return(prefix);
+}
