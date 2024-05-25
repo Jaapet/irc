@@ -27,8 +27,7 @@ private:
 	bool _nick_is_set;
 	std::string _realname;
 	bool _realname_is_set;
-
-	std::string channel;
+	std::string _sendBuffer;
 	bool		_waitpong;
 	std::time_t _lastpong;
 	bool		_is_op;
@@ -68,6 +67,8 @@ public:
 			{return (sizeof(_address_socket));}
 		int const &getFdSocket(void) const
 			{return (this->_fd_socket);}
+		std::string &getSendBuffer(void)
+			{return(this->_sendBuffer);}
 	//Setters
 	void setPassTrue(void)
 		{this->_pass_is_set = true;}
