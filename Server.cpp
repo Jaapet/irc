@@ -172,13 +172,7 @@ void Server::handleConnections(void)
 					}
 				}
 				else // if its not a new client
-				{
-					if(!this->_sessions[i]->getSendBuffer().empty()) //if sendBuffer of the session is not empty
-					{
-						send(i, this->_sessions[i]->getSendBuffer().c_str(), this->_sessions[i]->getSendBuffer().length() ,MSG_NOSIGNAL);
-						this->_sessions[i]->getSendBuffer().clear();
-					}
-						
+				{		
 					int nbytes = recv(i, buffer, sizeof(buffer), 0);
 					if (nbytes <= 0)
 					{
@@ -216,13 +210,19 @@ void Server::handleConnections(void)
 							if(!(tmp_msg.command.empty()))
 							{
 								tmp_msg.command = Utils::strToUpper(tmp_msg.command);
-								if(this->_commands[tmp_msg.command] != NULL)
+								if(tmp_msg.command == "QUIT") // In case of using QUIT, the session will be deleted before the getting of _sendBuffer, avoid a segfault
+									this->_commands[tmp_msg.command](this, this->_sessions[i], tmp_msg);
+								else if(this->_commands[tmp_msg.command] != NULL)
 									this->_sessions[i]->getSendBuffer() += this->_commands[tmp_msg.command](this, this->_sessions[i], tmp_msg);
 								else
 									this->_sessions[i]->getSendBuffer() += "ADD HERE CORRECT REPLY COMMAND NOT FOUND";
 							}
-
 						}
+					}
+					if(this->_sessions[i] && !this->_sessions[i]->getSendBuffer().empty()) //if sendBuffer of the session is not empty
+					{
+						send(i, this->_sessions[i]->getSendBuffer().c_str(), this->_sessions[i]->getSendBuffer().length() ,MSG_NOSIGNAL);
+						this->_sessions[i]->getSendBuffer().clear();
 					}
 				}
 			}
