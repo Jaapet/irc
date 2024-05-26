@@ -68,6 +68,8 @@
 		"cinttypes": "cpp",
 		"typeindex": "cpp",
 		"variant": "cpp",
-		"semaphore": "cpp"
+		"semaphore": "cpp",
+		"csignal": "cpp",
+		"cerrno": "cpp"
 	}
 }

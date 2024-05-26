@@ -143,8 +143,6 @@ std::string	Command::error_v2(Server *server, Session *session, Message  message
 
 std::string	Command::quit(Server *server, Session *session, Message  message)
 {
-	server->killSession(session->getFdSocket());
-	
 	Channel *tmp_chan = session->getChannel();
 	if(tmp_chan)
 	{
@@ -155,6 +153,7 @@ std::string	Command::quit(Server *server, Session *session, Message  message)
 			server->getSession(lst_user[i])->addSendBuffer(msg);
 		}
 	}
+	server->killSession(session->getFdSocket());
 	return("");
 }
 

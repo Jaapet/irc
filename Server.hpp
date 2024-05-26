@@ -4,11 +4,12 @@
 #include <iostream>
 #include <string>
 #include <map>
-
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <csignal> // for signal handling
 
 
 #include "Channel.hpp"
@@ -18,11 +19,15 @@
 #include "command.hpp"
 #include "debug.hpp"
 #include "utils.hpp"
-
+#include "Channel.hpp"
 #define BUFFER_SIZE  512
 #define BACKLOG  10
+#define VERBOSE true
+extern volatile sig_atomic_t ctrlc_pressed;
 
 struct Message;
+
+class Channel;
 
 class Session;
 
@@ -52,7 +57,7 @@ private:
 	bool _should_i_end_this_suffering; //Bool set to true to kill the server
 	
 
-	// std::map<std::string, Channel> _channels; // map of the channels, channel name is the key of the map, vallue is the object channel
+	std::map<std::string,Channel *> _channels; // map of the channels, channel name is the key of the map, vallue is the object channel
 	std::map<int, Session *> _sessions; //map of the sessions, session fd is the key
 	typedef std::string (*CommandPtr)(Server *, Session *, Message );
 	std::map<std::string, CommandPtr > _commands;
@@ -106,6 +111,7 @@ public:
 		int  getBackLog(void) const
 			{return (BACKLOG);}
 		
+		
 	//Setters
 
 	//Methods
@@ -118,4 +124,5 @@ public:
 		//Messages
 		std::vector<std::string>    splitBuffer(std::string const &str);
 		void parseMessage(const std::string &message, Message &outmessage);
+		void cleanExit(int exitcode);
 };

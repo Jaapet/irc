@@ -24,4 +24,4 @@ namespace Command
 	std::string	privmsg(Server *server, Session *session, Message  message);
 	std::string	notice(Server *server, Session *session, Message  message);
 	//std::string	oper(Server *server, Session *session, Message  message);
-};
+}

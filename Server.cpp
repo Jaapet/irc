@@ -6,6 +6,14 @@
 #include <ctime>
 #include <cerrno>
 
+
+void handle_signal_ctrld(int signal) {
+    if (signal == SIGINT) {
+        Debug::Warning("CTRL-C Pressed, end of the server");
+        // Set the flag to indicate Ctrl+C was pressed
+        ctrlc_pressed++;
+    }
+}
 //CONSTRUCTOR//////////////////////////////////////////////////
 Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(hostname), _password(pwd), _port(port) 
 {
@@ -25,29 +33,27 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 	Debug::Info("Attempt to initialize " + this->getHostName() + " IRC server");
 	try
 	{
-		
+		signal(SIGINT, handle_signal_ctrld);
+
 		this->createSocket();
 		this->bindSocket();
 		this->launchListen();
 		this->mapCommands();
 		this->initSessionsFds();
+		
+		Debug::Header();
 		Debug::Success("Launching of " + this->getHostName() + " IRC server was sucessfull " + Utils::getCurrentDate());
+		this->handleConnections();//loop until ctrl-c
 	}
 	catch(const std::exception& e)
 	{
-		Debug::Error(e.what());
-		std::exit(1); 
+		if(!ctrlc_pressed)
+		{
+			Debug::Error(e.what());
+			Server::cleanExit(1);
+		}
 	}
-	// Start of the loop to handle the cnx
-	try
-	{
-		this->handleConnections();
-	}
-	catch(const std::exception& e)
-	{
-		Debug::Error(e.what());
-		std::exit(1);
-	}
+	this->cleanExit(0);
 	
 }
 
@@ -140,13 +146,10 @@ void Server::handleConnections(void)
 		read_fd_cpy = this->_read_sessions_fd; //work on copy fdp set because someone told me to do that for an unknown reason
 		write_fd_cpy = this->_write_sessions_fd;
 		if(select(fd_max + 1, &read_fd_cpy, &write_fd_cpy, NULL, &this->_select_timeout) == -1) //select between read & write fdp with a specified timeout
-		{
-			Debug::Error(strerror(errno));
 			throw(Server::SelectCallError()); 
-		}
 
 		for(int i = 0; i <= fd_max; i++)
-		{
+		{	
 			if(FD_ISSET(i, &read_fd_cpy)) //Check if FD is in the SET, first itteration trigger the server fd, then all fd put with FD_SET
 			{
 				if (i == this->getFdSocket()) // New client found lets make a session, basically the read would be on the fd of the server
@@ -157,6 +160,8 @@ void Server::handleConnections(void)
 			if(FD_ISSET(i, &write_fd_cpy)) //check if current fd is in the write fd_set
 				this->handleWriteEvents(i);
 		}
+		if(ctrlc_pressed)
+			this->_should_i_end_this_suffering = true;
 	}
 
 }
@@ -255,7 +260,7 @@ void Server::killSession(int const session_fd)
 		return;
 	}
 	delete (this->_sessions[session_fd]);
-	this->_sessions[session_fd] = NULL;
+	this->_sessions.erase(session_fd);
 	close(session_fd);
 	FD_CLR(session_fd, &this->_read_sessions_fd);
 	FD_CLR(session_fd, &this->_write_sessions_fd);
@@ -373,4 +378,38 @@ std::vector<std::string>    Server::splitBuffer(std::string const &str)
         tmp = tmp.substr(f + del.size(), tmp.size() - 1);
     }
     return (com);
+}
+
+void Server::cleanExit(int exitcode)
+{
+	// for(size_t i = 0; i < this->_sessions.size(); i++)
+	// 	this->killSession(this->_sessions[i]->getFdSocket());
+	// for(size_t i = 0; i < this->_channels.size(); i++)
+		// this->rmchannel;
+
+	std::map<int, Session*>::iterator it;
+	if(this->_sessions.size() > 0)
+	{
+		for (it = this->_sessions.begin(); it != this->_sessions.end(); ++it)
+		{
+			Debug::Info("[cleanExit] Killing session: " + it->first);
+			this->killSession(it->first);
+		}
+			
+	}
+    
+	this->_should_i_end_this_suffering = true;
+	try
+	{
+		close(this->getFdSocket());
+		shutdown(this->getFdSocket(), SHUT_RDWR);
+	}
+	catch(const std::exception& e)
+	{
+		Debug::Error(e.what());
+		std::exit(1);
+	}
+	
+	
+	std::exit(exitcode);
 }
