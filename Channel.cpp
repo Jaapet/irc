@@ -58,7 +58,7 @@ int	Channel::add_user(std::string const &nickname)
 		return (1);
 	if (*std::find(this->users.begin(), this->users.end(), nickname) == nickname)
 		return (2);
-	if (this->users.size() >= this->max_users)
+	if (this->users.size() >= this->max_users && this->max_users)
 		return (3);
 	this->users.push_back(nickname);
 	return (0);

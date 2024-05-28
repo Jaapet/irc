@@ -1,5 +1,8 @@
 #include "Server.hpp"
 #include <unistd.h>
+#include <csignal>
+volatile sig_atomic_t ctrlc_pressed = 0;
+
 int main(int argc, char **argv)
 {
 	//Do parsing shit here
@@ -20,5 +23,5 @@ int main(int argc, char **argv)
 	}
 
 	Server irc(std::string(hostname), pwd , port);
-	std::cout << "test0" << std::endl;
+	
 }

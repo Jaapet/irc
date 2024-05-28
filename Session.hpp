@@ -10,7 +10,13 @@
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include "Server.hpp"
+
 #include "Channel.hpp"
+
+#include <ctime>
+
+class Channel;
+
 
 class Server;
 
@@ -27,6 +33,10 @@ private:
 	bool _nick_is_set;
 	std::string _realname;
 	bool _realname_is_set;
+	std::string _sendBuffer;
+	bool		_waitpong;
+	std::time_t _lastpong;
+	std::string	_away_status;
 
 	Channel	*channel;
 	//.. Add whatever you need
@@ -40,6 +50,8 @@ public:
 
 	//Getters
 		//Basic info
+		std::string	const getAwayStatus(void) const
+			{return (this->_away_status);}
 		bool getAuthenticated(void) const
 			{return (this->_authenticated);}
 		bool getPassIsSet(void) const
@@ -56,11 +68,17 @@ public:
 			{return(this->_realname);}
 		bool getRealNameIsSet(void) const
 			{return (this->_realname_is_set);}
+		bool getWaitPong(void)
+			{return(this->_waitpong);}
+		Channel *getChannel(void)
+			{return(this->_channel);}
 		//Socket info
 		socklen_t getLenSocket(void) const
 			{return (sizeof(_address_socket));}
 		int const &getFdSocket(void) const
 			{return (this->_fd_socket);}
+		std::string &getSendBuffer(void)
+			{return(this->_sendBuffer);}
 	//Setters
 	void setPassTrue(void)
 		{this->_pass_is_set = true;}
@@ -70,8 +88,11 @@ public:
 		{this->_username = username; this->_user_is_set = true;}
 	void setRealName(std::string const &realname)
 		{this->_realname = realname; this->_realname_is_set = true;}
+	void setWaitPong(void)
+		{this->_waitpong = true;}
 
 	bool authenticate(void); //Every time this method is call it check if everything is meet for completing the auth; then return the correct 4 REPL
+
 
 
 	int							join_chan(Channel &chan, std::string &pass); //JOIN ; 0 if ok, 1 if not invited, 2 if already, 3 if full
@@ -81,6 +102,14 @@ public:
 	std::vector<std::string>	names_chan(Channel &chan); //NAMES
 	void						get_invited(Channel &chan); //INVITE
 	void						invite(Session &user, Channel &chan); //INVITE
+
+
+	void newPong()
+		{this->_lastpong = std::time(NULL); this->_waitpong = false;}
+	void addSendBuffer(std::string &str)
+	{
+		this->_sendBuffer += str;
+	}
 
 };
 

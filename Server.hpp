@@ -4,11 +4,12 @@
 #include <iostream>
 #include <string>
 #include <map>
-
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <csignal> // for signal handling
 
 
 #include "Channel.hpp"
@@ -17,11 +18,16 @@
 
 #include "command.hpp"
 #include "debug.hpp"
-
+#include "utils.hpp"
+#include "Channel.hpp"
 #define BUFFER_SIZE  512
 #define BACKLOG  10
+#define VERBOSE true
+extern volatile sig_atomic_t ctrlc_pressed;
 
 struct Message;
+
+class Channel;
 
 class Session;
 
@@ -34,7 +40,9 @@ private:
 	struct sockaddr_in _address_socket; // (Server) struct who contain socket info
 
 	// Not used outside of server class no need for getters
-	fd_set _sessions_fd;
+	fd_set _read_sessions_fd;
+	fd_set _write_sessions_fd;
+	timeval _select_timeout;
 	//
 	std::string _hostname; // hostname of the irc server
 	std::string _password; // password to join the server, no getter for obvious reasons
@@ -49,7 +57,7 @@ private:
 	bool _should_i_end_this_suffering; //Bool set to true to kill the server
 	
 
-	// std::map<std::string, Channel> _channels; // map of the channels, channel name is the key of the map, vallue is the object channel
+	std::map<std::string,Channel *> _channels; // map of the channels, channel name is the key of the map, vallue is the object channel
 	std::map<int, Session *> _sessions; //map of the sessions, session fd is the key
 	typedef std::string (*CommandPtr)(Server *, Session *, Message );
 	std::map<std::string, CommandPtr > _commands;
@@ -61,7 +69,10 @@ private:
 	void initSessionsFds(void);
 	void mapCommands(void);
 	void handleConnections(void);
-
+	void handleNewSession(int &fd_max);
+	void handleReadEvents(int cur_fd);
+	void executeCommands(std::vector<std::string> command_to_execute, int cur_fd);
+	void handleWriteEvents( int cur_fd);
 	
 public:
 	Server(std::string hostname, std::string pwd, uint16_t port);
@@ -100,10 +111,12 @@ public:
 		int  getBackLog(void) const
 			{return (BACKLOG);}
 		
+		
 	//Setters
 
 	//Methods
 		//Sessions
+		void setNonBlockingFd(int fd);
 		bool checkPassword(std::string passwordToCheck) const
 			{return (passwordToCheck == this->_password);}
 		void killSession(int const session_fd);
@@ -111,8 +124,5 @@ public:
 		//Messages
 		std::vector<std::string>    splitBuffer(std::string const &str);
 		void parseMessage(const std::string &message, Message &outmessage);
-		std::string removeCRLF(std::string const &str);
-		std::string strToUpper(std::string const &str);
-		std::string getCurrentDate(void);
-		
+		void cleanExit(int exitcode);
 };
