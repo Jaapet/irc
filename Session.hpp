@@ -71,7 +71,7 @@ public:
 		bool getWaitPong(void)
 			{return(this->_waitpong);}
 		Channel *getChannel(void)
-			{return(this->_channel);}
+			{return(this->channel);}
 		//Socket info
 		socklen_t getLenSocket(void) const
 			{return (sizeof(_address_socket));}
