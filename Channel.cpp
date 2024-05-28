@@ -52,7 +52,7 @@ bool	Channel::is_op(std::string const &nickname)
 
 //-----------------------------------------------------------------------------------------------
 
-bool	Channel::add_user(std::string const &nickname)
+int	Channel::add_user(std::string const &nickname)
 {
 	if (this->invite && *std::find(this->invited_users.begin(), this->invited_users.end(), nickname) != nickname)
 		return (1);
