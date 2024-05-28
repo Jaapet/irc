@@ -12,8 +12,6 @@ class Server;
 
 namespace Command
 {
-	std::string getUserPrefix(Server *server, Session *session);
-
 	std::string cap(Server *server, Session *session, Message  message);
 	std::string	pass(Server *server, Session *session, Message  message);
 	std::string	nick(Server *server, Session *session, Message  message);
@@ -26,4 +24,4 @@ namespace Command
 	std::string	privmsg(Server *server, Session *session, Message  message);
 	std::string	notice(Server *server, Session *session, Message  message);
 	//std::string	oper(Server *server, Session *session, Message  message);
-};
+}

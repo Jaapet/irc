@@ -36,3 +36,11 @@ class SessionCreationError : public std::exception {
 		return("Cannot create a session");
 	}
 };
+
+class DuplicatedSessionFd : public std::exception {
+	public:
+	const char *what() const throw()
+	{
+		return("Duplicate session fd or a ghost session");
+	}
+};

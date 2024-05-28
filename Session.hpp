@@ -10,9 +10,13 @@
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include "Server.hpp"
+
+#include "Channel.hpp"
+
 #include <ctime>
 
 class Channel;
+
 
 class Server;
 
@@ -34,7 +38,7 @@ private:
 	std::time_t _lastpong;
 	std::string	_away_status;
 
-	Channel *_channel;
+	Channel	*channel;
 	//.. Add whatever you need
 
 public:
@@ -67,7 +71,7 @@ public:
 		bool getWaitPong(void)
 			{return(this->_waitpong);}
 		Channel *getChannel(void)
-			{return(this->_channel);}
+			{return(this->channel);}
 		//Socket info
 		socklen_t getLenSocket(void) const
 			{return (sizeof(_address_socket));}
@@ -88,12 +92,25 @@ public:
 		{this->_waitpong = true;}
 
 	bool authenticate(void); //Every time this method is call it check if everything is meet for completing the auth; then return the correct 4 REPL
+
+
+
+	int							join_chan(Channel &chan, std::string &pass); //JOIN ; 0 if ok, 1 if not invited, 2 if already, 3 if full
+	bool						quit_chan(Channel &chan); //PART ; KICK ; false if user not in chan
+	void						set_topic(Channel &chan, std::string &topic); //TOPIC ; if empty string, clears the topic
+	std::string					get_topic(Channel &chan); //TOPIC
+	std::vector<std::string>	names_chan(Channel &chan); //NAMES
+	void						get_invited(Channel &chan); //INVITE
+	void						invite(Session &user, Channel &chan); //INVITE
+
+
 	void newPong()
 		{this->_lastpong = std::time(NULL); this->_waitpong = false;}
 	void addSendBuffer(std::string &str)
 	{
 		this->_sendBuffer += str;
 	}
+
 };
 
 

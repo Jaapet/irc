@@ -36,11 +36,11 @@ public :
 	void	set_invite(const bool &invite);
 
 	std::string					get_topic(void){return(topic);}; //TOPIC
-	std::vector<std::string>	get_users(void){return(users);}; //NAME
+	std::vector<std::string>	get_users(void){return(users);}; //NAMES
 	u_int16_t					get_nmemb(void){return(users.size());}; //LIST ; timestamp ?
 	bool						is_op(std::string const &nickname);
 
-	bool	add_user(std::string const &nickname); //JOIN ; 0 if ok, 1 if not invited, 2 if already, 3 if full
+	int		add_user(std::string const &nickname); //JOIN ; 0 if ok, 1 if not invited, 2 if already, 3 if full
 	bool	rm_user(std::string const &nickname); //PART ; KICK ; false if user not in chan
 	void	invite_user(std::string const &nickname); //INVITE
 
