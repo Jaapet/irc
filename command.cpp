@@ -226,5 +226,39 @@ std::string	Command::pong(Server *server, Session *session, Message  message)
 		Debug::Warning("Received an unexpected PONG while not waiting it or the token is not valid");
 		return("");
 	}
-	
+}
+
+//CHANNELS-----------------------------------------------------
+
+	std::string	Command::part(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return ("");
+	if (!message.params.size())
+		return (Error::ERR_NEEDMOREPARAMS_461(server, session, message));
+	if (message.params.size() > 1)
+		return ("");
+	try
+	{
+		std::map<std::string,Channel *> chans = server->getChannels();
+		Channel	*chan = chans[message.params[0]];
+		for (size_t i = 0; i < chan->get_nmemb(); i++)
+		{
+			if (chan->get_users()[i] == message.sender)
+			{
+				chan->rm_user(message.sender);
+				std::string	reason = "";
+				if (!message.payload.empty())
+					reason = " :" + message.payload;
+				//TO DO - send to channel
+				std::string	msg = Utils::getUserPrefix(server, session) + "PART " + message.params[0] + reason + Reply::endr;
+				session->addSendBuffer(msg);
+			}
+		}
+		return (Error::ERR_NOTONCHANNEL_442(server, session, message));
+	}
+	catch (const std::exception& e)
+	{
+		return (Error::ERR_NOSUCHCHANNEL_403(server, session, message));
+	}
 }
