@@ -69,7 +69,7 @@ std::string Error::ERR_NORECIPIENT_411(Server *server, Session *session, Message
 {
 	Debug::Reply("ERR_NORECIPIENT(411)", session->getFdSocket());
 
-	std::string msg =Utils::getServerPrefix(server, session, "411") + session->getNickName() + " :No recipient given (" + message.command + ")" + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "411") + session->getNickName() + " :No recipient given (" + message.command + ")" + Reply::endr;
 	return(msg);
 }
 

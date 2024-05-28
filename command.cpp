@@ -186,11 +186,8 @@ std::string	Command::privmsg(Server *server, Session *session, Message  message)
 		return (Error::ERR_NOSUCHNICK_401(server, session, message));
 	if (session->getAwayStatus() != "")
 		return (Error::RPL_AWAY_301(server, session, message));
-	if(!message.payload.empty())
-		msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
-	else if(!message.params[1].empty())
-		msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.params[1] + Reply::endr; //Add for more natural command line
-	
+	std::string	msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
+	//send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
 	server->getSession(message.params[0])->addSendBuffer(msg);
 	return ("");
 }
