@@ -218,10 +218,12 @@ void Server::handleConnections(void)
 									this->_sessions[i]->getSendBuffer() += "ADD HERE CORRECT REPLY COMMAND NOT FOUND";
 							}
 						}
+						std::cout << "ff" << std::endl;
 					}
-					if(this->_sessions[i] && !this->_sessions[i]->getSendBuffer().empty()) //if sendBuffer of the session is not empty
+					if(this->_sessions[i] && this->_sessions[i]->getSendBuffer().empty() == false) //if sendBuffer of the session is not empty
 					{
 						send(i, this->_sessions[i]->getSendBuffer().c_str(), this->_sessions[i]->getSendBuffer().length() ,MSG_NOSIGNAL);
+						std::cout << "sdf" << std::endl;
 						this->_sessions[i]->getSendBuffer().clear();
 					}
 				}
