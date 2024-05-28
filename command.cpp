@@ -125,35 +125,44 @@ std::string	Command::user(Server *server, Session *session, Message message)
 	
 // }
 
-std::string	Command::error(Server *server, Session *session, Message  message)
-{
-	(void)server;
-	if(session->getAuthenticated() == false || message.payload.empty())
-		return("");
-	return("Error: " + message.payload + "\n");
-}
+// std::string	Command::error(Server *server, Session *session, Message  message)
+// {
+// 	(void)server;
+// 	if(session->getAuthenticated() == false || message.payload.empty())
+// 		return("");
+// 	return("Error: " + message.payload + "\n");
+// }
 
-std::string	Command::error_v2(Server *server, Session *session, Message  message)
-{
-	(void)server;
-	if(session->getAuthenticated() == false || message.payload.empty())
-		return("");
-	return("Error :" + Command::quit(server, session, message) + Reply::endr);
-}
+// std::string	Command::error_v2(Server *server, Session *session, Message  message)
+// {
+// 	(void)server;
+// 	if(session->getAuthenticated() == false || message.payload.empty())
+// 		return("");
+// 	return("Error :" + Command::quit(server, session, message) + Reply::endr);
+// }
 
 std::string	Command::quit(Server *server, Session *session, Message  message)
 {
+	std::string msg;
+	msg = "ERROR :Respond to QUIT from client";
+	session->addSendBuffer(msg);
+	msg = Utils::getUserPrefix(server, session) + "QUIT :" + "Quit: " + message.payload + Reply::endr;
 	Channel *tmp_chan = session->getChannel();
 	if(tmp_chan)
 	{
-		std::string msg = ":" +session->getNickName() + " !d@" + server->getHostName() + "QUIT :" + "Quit: " + message.payload + Reply::endr; // A CHECK
-		std::vector<std::string> lst_user = tmp_chan->get_users();
-		for(size_t i = 0; i < lst_user.size(); i++)
-		{
-			server->getSession(lst_user[i])->addSendBuffer(msg);
-		}
+		std::string chan_name = tmp_chan->get_name();
+		Utils::sendToChannel(server, tmp_chan, msg, chan_name);
 	}
-	server->killSession(session->getFdSocket());
+		
+	// {
+		// std::string msg = ":" +session->getNickName() + " !d@" + server->getHostName() + "QUIT :" + "Quit: " + message.payload + Reply::endr; // A CHECK
+		// std::vector<std::string> lst_user = tmp_chan->get_users();
+		// for(size_t i = 0; i < lst_user.size(); i++)
+		// {
+		// 	server->getSession(lst_user[i])->addSendBuffer(msg);
+		// }
+	// }
+	server->killSession(session->getFdSocket(), true);
 	return("");
 }
 

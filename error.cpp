@@ -1,5 +1,13 @@
 #include "debug.hpp"
 #include "error.hpp"
+std::string Error::ERR_UNKNOWNCOMMAND_421(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_UNKNOWNCOMMAND(421)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "421") + message.command + " :Unknown command" + Reply::endr;
+	return(msg);	
+}
+
 std::string Error::ERR_ERRONEUSNICKNAME_432(Server *server, Session *session, Message message)
 {
 	Debug::Reply("ERR_ERRONEUSNICKNAME(432)", session->getFdSocket());
@@ -44,8 +52,7 @@ std::string Error::ERR_CANNOTSENDTICHAN_404(Server *server, Session *session, Me
 {
 	Debug::Reply("ERR_ERRONEUSNICKNAME(404)", session->getFdSocket());
 
-	(void)message;
-	std::string msg = Utils::getServerPrefix(server, session, "404") + " " + session->getNickName() + " " + "<channel>" + " :Cannot send to channel" + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "404") + " " + session->getNickName() + " " + message.params[0] + " :Cannot send to channel" + Reply::endr;
 	return(msg);	
 }
 

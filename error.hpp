@@ -8,6 +8,7 @@ struct Message;
 
 namespace Error
 {
+	std::string ERR_UNKNOWNCOMMAND_421(Server *server, Session *session, Message message);
 	std::string ERR_ERRONEUSNICKNAME_432(Server *server, Session *session, Message message);
 	std::string ERR_NICKNAMEINUSE_433(Server *server, Session *session, Message message);
 	std::string ERR_NEEDMOREPARAMS_461(Server *server, Session *session, Message message);
