@@ -90,8 +90,18 @@ std::string Error::ERR_PASSWDMISMATCH_464(Server *server, Session *session)
 	return(msg);
 }
 
+std::string ERR_NOSUCHCHANNEL_403(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOSUCHCHANNEL(403)", session->getFdSocket());
 
+	std::string msg = Utils::getServerPrefix(server, session, "403") + session->getNickName() + " " + message.params[0] + " :No such channel" + Reply::endr;
+	return(msg);
+}
 
+std::string ERR_NOTONCHANNEL_442(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOTONCHANNEL(442)", session->getFdSocket());
 
-
-
+	std::string msg = Utils::getServerPrefix(server, session, "442") + session->getNickName() + " " + message.params[0] + " :You're not on that channel" + Reply::endr;
+	return(msg);
+}

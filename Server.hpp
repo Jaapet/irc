@@ -110,6 +110,9 @@ public:
 			{return (BUFFER_SIZE);}
 		int  getBackLog(void) const
 			{return (BACKLOG);}
+
+		std::map<std::string,Channel *> const &getChannels(void) const
+			{return (this->_channels);}
 		
 		
 	//Setters
