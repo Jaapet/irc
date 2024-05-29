@@ -35,6 +35,7 @@ public :
 	void	set_op_topic(const bool &op_topic);
 	void	set_invite(const bool &invite);
 
+	std::string					get_name(void){return(name);}; //TOPIC
 	std::string					get_topic(void){return(topic);}; //TOPIC
 	std::vector<std::string>	get_users(void){return(users);}; //NAMES
 	size_t					get_nmemb(void){return(users.size());}; //LIST ; timestamp ?

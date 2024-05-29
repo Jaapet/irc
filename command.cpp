@@ -125,35 +125,44 @@ std::string	Command::user(Server *server, Session *session, Message message)
 	
 // }
 
-std::string	Command::error(Server *server, Session *session, Message  message)
-{
-	(void)server;
-	if(session->getAuthenticated() == false || message.payload.empty())
-		return("");
-	return("Error: " + message.payload + "\n");
-}
+// std::string	Command::error(Server *server, Session *session, Message  message)
+// {
+// 	(void)server;
+// 	if(session->getAuthenticated() == false || message.payload.empty())
+// 		return("");
+// 	return("Error: " + message.payload + "\n");
+// }
 
-std::string	Command::error_v2(Server *server, Session *session, Message  message)
-{
-	(void)server;
-	if(session->getAuthenticated() == false || message.payload.empty())
-		return("");
-	return("Error :" + Command::quit(server, session, message) + Reply::endr);
-}
+// std::string	Command::error_v2(Server *server, Session *session, Message  message)
+// {
+// 	(void)server;
+// 	if(session->getAuthenticated() == false || message.payload.empty())
+// 		return("");
+// 	return("Error :" + Command::quit(server, session, message) + Reply::endr);
+// }
 
 std::string	Command::quit(Server *server, Session *session, Message  message)
 {
+	std::string msg;
+	msg = "ERROR :Respond to QUIT from client";
+	session->addSendBuffer(msg);
+	msg = Utils::getUserPrefix(server, session) + "QUIT :" + "Quit: " + message.payload + Reply::endr;
 	Channel *tmp_chan = session->getChannel();
 	if(tmp_chan)
 	{
-		std::string msg = ":" +session->getNickName() + " !d@" + server->getHostName() + "QUIT :" + "Quit: " + message.payload + Reply::endr; // A CHECK
-		std::vector<std::string> lst_user = tmp_chan->get_users();
-		for(size_t i = 0; i < lst_user.size(); i++)
-		{
-			server->getSession(lst_user[i])->addSendBuffer(msg);
-		}
+		std::string chan_name = tmp_chan->get_name();
+		Utils::sendToChannel(server, tmp_chan, msg, chan_name);
 	}
-	server->killSession(session->getFdSocket());
+		
+	// {
+		// std::string msg = ":" +session->getNickName() + " !d@" + server->getHostName() + "QUIT :" + "Quit: " + message.payload + Reply::endr; // A CHECK
+		// std::vector<std::string> lst_user = tmp_chan->get_users();
+		// for(size_t i = 0; i < lst_user.size(); i++)
+		// {
+		// 	server->getSession(lst_user[i])->addSendBuffer(msg);
+		// }
+	// }
+	server->killSession(session->getFdSocket(), true);
 	return("");
 }
 
@@ -176,7 +185,7 @@ std::string	Command::privmsg(Server *server, Session *session, Message  message)
 	if(session->getAuthenticated() == false)
 		return ("");
 	if (message.params.size() > 2)
-		return (Error::ERR_TOOMENYTARGETS_407(server, session, message));
+		return (Error::ERR_TOOMANYTARGETS_407(server, session, message));
 	if (message.params.size() == 0)
 		return (Error::ERR_NORECIPIENT_411(server, session, message));
 	if (message.payload.empty() && message.params.size() == 1)
@@ -185,9 +194,12 @@ std::string	Command::privmsg(Server *server, Session *session, Message  message)
 	if (!server->getSession(message.params[0]))
 		return (Error::ERR_NOSUCHNICK_401(server, session, message));
 	if (session->getAwayStatus() != "")
-		return (Error::RPL_AWAY_301(server, session, message));
-	std::string	msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
-	//send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+		return (Reply::RPL_AWAY_301(server, session, message));
+	if(!message.payload.empty())
+		msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
+	else if(!message.params[1].empty())
+		msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.params[1] + Reply::endr; //Add for more natural command line
+
 	server->getSession(message.params[0])->addSendBuffer(msg);
 	return ("");
 }
@@ -222,8 +234,7 @@ std::string	Command::pong(Server *server, Session *session, Message  message)
 	{
 		Debug::Warning("Received an unexpected PONG while not waiting it or the token is not valid");
 		return("");
-	}
-}
+	}}
 
 //CHANNELS-----------------------------------------------------
 
@@ -259,3 +270,126 @@ std::string	Command::pong(Server *server, Session *session, Message  message)
 		return (Error::ERR_NOSUCHCHANNEL_403(server, session, message));
 	}
 }
+	
+}
+
+// std::string	Command::join(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::topic(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::names(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::list(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::invite(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::kick(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::motd(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::version(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::admin(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::lusers(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::time(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::stats(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::help(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::info(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::mode(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::who(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::whois(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+
+// std::string	Command::away(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::userhost(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::wallops(Server *server, Session *session, Message  message)
+// {
+
+	
+// }

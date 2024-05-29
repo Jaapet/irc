@@ -125,3 +125,12 @@ void Utils::sendToChannel(Server *server, Channel *channel, std::string &msg, st
 		}
 	}
 }
+
+void Utils::sendBufferNow(Session *session)
+{
+	if(!session->getSendBuffer().empty())
+	{
+		send(session->getFdSocket(), session->getSendBuffer().c_str(), session->getSendBuffer().length(), MSG_NOSIGNAL);
+		session->getSendBuffer().clear();
+	}
+}

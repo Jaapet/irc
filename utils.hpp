@@ -24,4 +24,5 @@ namespace Utils
 
 	std::string getUserPrefix(Server *server, Session *session);
 	std::string getServerPrefix(Server *server, Session *session, std::string rep_code);
+	void sendBufferNow(Session *session);
 }
