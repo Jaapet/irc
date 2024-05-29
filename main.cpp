@@ -30,12 +30,12 @@ int main(int argc, char **argv)
 	int port;
 	std::string pwd;
 
-	if (argc != 3 && argc != 4)
+	if (argc != 3)
 	{
-		Debug::Error("Invalid use it should be \"./ircserv [host:port_network:password_network] <port> <password>\"");
+		Debug::Error("Invalid use it should be \"./ircserv <port> <password>\"");
 		std::exit(1);
 	}
-	if (argc == 3)
+	else
 	{
 		
 		port = atoi(argv[1]);
@@ -49,40 +49,36 @@ int main(int argc, char **argv)
 		char hostname[256];
 		if (gethostname(hostname, sizeof(hostname)) != 0)
 		{
-			Debug::Error("Invalid hostname JPTA");
+			Debug::Error("Invalid hostname");
 			std::exit(1);
 		}
-		Server irc_argc3(std::string(hostname), pwd , port);
+		Server irc(std::string(hostname), pwd , port);
 	}
-	else if (argc == 4)
-	{
-		port = atoi(argv[2]);
-		if(port < 0 || port > 65535 )
-		{
-			Debug::Error("Invalid server port");
-			std::exit(1);
-		}
-		pwd = argv[3];
-		checkColumn(argv[1]);
+	// else if (argc == 4)
+	// {
+	// 	port = atoi(argv[2]);
+	// 	if(port < 0 || port > 65535 )
+	// 	{
+	// 		Debug::Error("Invalid server port");
+	// 		std::exit(1);
+	// 	}
+	// 	pwd = argv[3];
+	// 	checkColumn(argv[1]);
 		
-		char *token = strtok(const_cast<char*>(argv[1]), ":");
-		std::string host = token;
-		token = strtok(NULL, ":");
-		int port_network = atoi(token);
-		token = strtok(NULL, ":");
-		std::string password_network = token;
-		if(port_network < 0 || port_network > 65535 )
-		{
-			Debug::Error("Invalid network port");
-			std::exit(1);
-		}
-		(void)port_network;
-		(void)password_network;
-		Server irc_argc4(host, pwd , port);
-	}
-
-	
-
-	
-	
+	// 	char *token = strtok(const_cast<char*>(argv[1]), ":");
+	// 	std::string host = token;
+	// 	token = strtok(NULL, ":");
+	// 	int port_network = atoi(token);
+	// 	token = strtok(NULL, ":");
+	// 	std::string password_network = token;
+	// 	if(port_network < 0 || port_network > 65535 )
+	// 	{
+	// 		Debug::Error("Invalid network port");
+	// 		std::exit(1);
+	// 	}
+	// 	(void)port_network;
+	// 	(void)password_network;
+	// 	Server irc_argc4(host, pwd , port);
+	// }
+	return(0);
 }

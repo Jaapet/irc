@@ -185,7 +185,7 @@ std::string	Command::privmsg(Server *server, Session *session, Message  message)
 	if(session->getAuthenticated() == false)
 		return ("");
 	if (message.params.size() > 2)
-		return (Error::ERR_TOOMENYTARGETS_407(server, session, message));
+		return (Error::ERR_TOOMANYTARGETS_407(server, session, message));
 	if (message.params.size() == 0)
 		return (Error::ERR_NORECIPIENT_411(server, session, message));
 	if (message.payload.empty() && message.params.size() == 1)
@@ -194,7 +194,7 @@ std::string	Command::privmsg(Server *server, Session *session, Message  message)
 	if (!server->getSession(message.params[0]))
 		return (Error::ERR_NOSUCHNICK_401(server, session, message));
 	if (session->getAwayStatus() != "")
-		return (Error::RPL_AWAY_301(server, session, message));
+		return (Reply::RPL_AWAY_301(server, session, message));
 	if(!message.payload.empty())
 		msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
 	else if(!message.params[1].empty())
@@ -237,3 +237,130 @@ std::string	Command::pong(Server *server, Session *session, Message  message)
 	}
 	
 }
+
+// std::string	Command::join(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::part(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::topic(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::names(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::list(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::invite(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::kick(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::motd(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::version(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::admin(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::lusers(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::time(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::stats(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::help(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::info(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::mode(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::who(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::whois(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+
+// std::string	Command::away(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::userhost(Server *server, Session *session, Message  message)
+// {
+
+	
+// }
+
+// std::string	Command::wallops(Server *server, Session *session, Message  message)
+// {
+
+	
+// }

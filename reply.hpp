@@ -15,4 +15,6 @@ namespace Reply
 	std::string RPL_YOURHOST_002(Server *server, Session *session, Message message);
 	std::string RPL_CREATED_003(Server *server, Session *session, Message message);
 	std::string RPL_MYINFO_004(Server *server, Session *session, Message message);
+	std::string RPL_AWAY_301(Server *server, Session *session, Message message);
+
 }

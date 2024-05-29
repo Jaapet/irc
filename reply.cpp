@@ -46,3 +46,11 @@ std::string Reply:: RPL_MYINFO_004(Server *server, Session *session, Message mes
 	std::string msg = Utils::getServerPrefix(server, session, "004") + server->getServerName() + " " + server->getVersion() + " " + server->getAvailableUserModes() + " " + server->getAvailableChannelModes() + Reply::endr; //Channel mode with a parameter ?
 	return(msg);
 }
+
+std::string Reply::RPL_AWAY_301(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOTEXTTOSNED(301)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "301") + session->getNickName() + " " + message.params[0] + " :" + session->getAwayStatus() + Reply::endr;
+	return(msg);
+}
