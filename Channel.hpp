@@ -14,7 +14,7 @@ private :
 	std::string	name;
 	std::string	pw; // empty means no password
 	std::string	topic; // ?
-	u_int16_t	max_users; // 0 means no limit
+	size_t	max_users; // 0 means no limit
 	bool		op_topic; // ?
 	bool		invite;
 
@@ -31,13 +31,13 @@ public :
 	void	set_name(const std::string &name);
 	void	set_pw(const std::string &pw);
 	void	set_topic(const std::string &topic); //TOPIC ; if empty string, clears the topic
-	void	set_max_users(const u_int16_t &max_users);
+	void	set_max_users(const size_t &max_users);
 	void	set_op_topic(const bool &op_topic);
 	void	set_invite(const bool &invite);
 
 	std::string					get_topic(void){return(topic);}; //TOPIC
 	std::vector<std::string>	get_users(void){return(users);}; //NAMES
-	u_int16_t					get_nmemb(void){return(users.size());}; //LIST ; timestamp ?
+	size_t					get_nmemb(void){return(users.size());}; //LIST ; timestamp ?
 	bool						is_op(std::string const &nickname);
 
 	int		add_user(std::string const &nickname); //JOIN ; 0 if ok, 1 if not invited, 2 if already, 3 if full

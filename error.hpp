@@ -19,4 +19,6 @@ namespace Error
 	std::string ERR_NORECIPIENT_411(Server *server, Session *session, Message message);
 	std::string ERR_NOTEXTTOSNED_412(Server *server, Session *session, Message message);
 	std::string RPL_AWAY_301(Server *server, Session *session, Message message);
+	std::string ERR_NOSUCHCHANNEL_403(Server *server, Session *session, Message message);
+	std::string ERR_NOTONCHANNEL_442(Server *server, Session *session, Message message);
 }
