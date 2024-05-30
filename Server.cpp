@@ -23,7 +23,7 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 	this->_select_timeout.tv_sec = 1;
 	this->_select_timeout.tv_usec = 0;
 
-	this->_servername = "PEPPA_IRC";
+	this->_servername = hostname;
 	this->_networkname = "NETWORK_NAME";
 	this->_version = "1234";
 	this->_available_user_modes = "AVAILABLE_USER_MODES";
@@ -132,8 +132,11 @@ void Server::mapCommands(void)
 	this->_commands["PONG"] = &(Command::pong);
 	this->_commands["QUIT"] = &(Command::quit);
 	this->_commands["PRIVMSG"] = &(Command::privmsg);
-	this->_commands["NOTICE"] = &(Command::notice);
-	//this->_commands["ERROR"] = &(Command::error);
+	this->_commands["NOTICE"] = &(Command::privmsg); //Pourquoi pas launch la cmd PRIVMSG
+	this->_commands["JOIN"] = &(Command::join);
+	this->_commands["PART"] = &(Command::part);
+	this->_commands["WHO"] = &(Command::who);
+	
 }
 
 
@@ -431,3 +434,26 @@ void Server::cleanExit(int exitcode)
 	Debug::Success("Server is successfully closed");
 	std::exit(exitcode);
 }
+
+Channel *Server::getChannel(std::string channel_name)
+{
+	try
+	{
+		return(this->_channels.at(channel_name));
+	}
+	catch(const std::exception& e)
+	{
+		return(NULL);
+	}
+}
+
+void Server::removeChannel(std::string chan_name)
+{
+	std::vector<std::string> users = this->_channels.at(chan_name)->get_users();
+	for(size_t i = 0; i < users.size(); i++)
+	{
+		this->getSession(users[i])->setChannel(NULL);
+	}
+	delete this->_channels.at(chan_name);
+ 	this->_channels.erase(chan_name);
+}	

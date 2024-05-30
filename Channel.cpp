@@ -1,10 +1,17 @@
 #include "Channel.hpp"
 
-Channel::Channel (std::string const &name)
+Channel::Channel (std::string const &name, std::string const &founder)
 {
 	this->name = name;
+	this->founder = founder;
 	this->op_topic = false;
 	this->invite = false;
+	this->topic = "";
+}
+
+Channel::~Channel ()
+{
+
 }
 
 void	Channel::set_name(const std::string &name)
@@ -41,7 +48,7 @@ void	Channel::set_invite(const bool &invite)
 
 bool	Channel::is_op(std::string const &nickname)
 {
-	for (int i = 0; i < this->operators.size(); i++)
+	for (size_t i = 0; i < this->operators.size(); i++)
 	{
 		if (this->operators[i] == nickname)
 			return (true);
@@ -54,12 +61,12 @@ bool	Channel::is_op(std::string const &nickname)
 
 int	Channel::add_user(std::string const &nickname)
 {
-	if (this->invite && *std::find(this->invited_users.begin(), this->invited_users.end(), nickname) != nickname)
-		return (1);
-	if (*std::find(this->users.begin(), this->users.end(), nickname) == nickname)
-		return (2);
-	if (this->users.size() >= this->max_users && this->max_users)
-		return (3);
+	// if (this->invite && *std::find(this->invited_users.begin(), this->invited_users.end(), nickname) != nickname)
+	// 	return (1);
+	// if (*std::find(this->users.begin(), this->users.end(), nickname) == nickname)
+	// 	return (2);
+	// if (this->users.size() >= this->max_users && this->max_users)
+	// 	return (3);
 	this->users.push_back(nickname);
 	return (0);
 }
@@ -68,7 +75,7 @@ bool	Channel::rm_user(std::string const &nickname)
 {
 	std::string temp;
 
-	for (int i = 0; i < this->users.size(); i++)
+	for (size_t i = 0; i < this->users.size(); i++)
 	{
 		if (this->users[i] == nickname)
 		{
@@ -83,10 +90,20 @@ bool	Channel::rm_user(std::string const &nickname)
 
 void	Channel::invite_user(std::string const &nickname)
 {
-	for (int i = 0; i < this->invited_users.size(); i++)
+	for (size_t i = 0; i < this->invited_users.size(); i++)
 	{
 		if (this->invited_users[i] == nickname)
 			return ;
 	}
 	this->invited_users.push_back(nickname);
+}
+
+bool	Channel::getUserInvited(std::string const &nickname)
+{
+	for (size_t i = 0; i < this->invited_users.size(); i++)
+	{
+		if (this->invited_users[i] == nickname)
+			return true;
+	}
+	return false;
 }

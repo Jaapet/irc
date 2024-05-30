@@ -8,6 +8,26 @@ std::string Error::ERR_NOSUCHNICK_401(Server *server, Session *session, Message 
 	return(msg);
 }
 
+std::string Error::ERR_NOSUCHCHANNEL_403(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOSUCHCHANNEL(403)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "403") + session->getNickName() + " " + message.params[0] + " :No such channel" + Reply::endr;
+	return(msg);
+}
+
+std::string Error::ERR_TOOMANYCHANNELS_405(Server *server, Session *session, Message message)
+{
+	(void)message;
+	Debug::Reply("ERR_TOOMANYCHANNELS(405)", session->getFdSocket());
+
+	std::string chan_name;
+	if(session->getChannel() == NULL)
+		chan_name = "*";
+	std::string msg = Utils::getServerPrefix(server, session, "405") + " " + chan_name + " :You have joined too many channels" + Reply::endr;
+	return(msg);	
+}
+
 std::string Error::ERR_CANNOTSENDTICHAN_404(Server *server, Session *session, Message message)
 {
 	Debug::Reply("ERR_ERRONEUSNICKNAME(404)", session->getFdSocket());
@@ -65,6 +85,13 @@ std::string Error::ERR_NICKNAMEINUSE_433(Server *server, Session *session, Messa
 	std::string msg = Utils::getServerPrefix(server, session, "433") + " " + message.params[0] + " :Nickname is already in use" + Reply::endr;
 	return(msg);	
 }
+std::string  Error::ERR_NOTONCHANNEL_442(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOTONCHANNEL(442)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "442") + session->getNickName() + " " + message.params[0] + " :You're not on that channel" + Reply::endr;
+	return(msg);
+}
 
 std::string Error::ERR_NEEDMOREPARAMS_461(Server *server, Session *session,  Message message)
 {
@@ -84,24 +111,30 @@ std::string Error::ERR_ALREADYREGISTRED_462(Server *server, Session *session)
 
 std::string Error::ERR_PASSWDMISMATCH_464(Server *server, Session *session)
 {
-	Debug::Reply("ERR_PASSWDMISMATCH_464", session->getFdSocket());
+	Debug::Reply("ERR_PASSWDMISMATCH(464)", session->getFdSocket());
 
 	std::string msg = Utils::getServerPrefix(server, session, "464") + ":Password incorrect" + Reply::endr;
 	return(msg);
 }
-
-std::string ERR_NOSUCHCHANNEL_403(Server *server, Session *session, Message message)
+std::string Error::ERR_INVITEONLYCHAN_473(Server *server, Session *session, std::string &chan_name)
 {
-	Debug::Reply("ERR_NOSUCHCHANNEL(403)", session->getFdSocket());
+	Debug::Reply("ERR_INVITEONLYCHAN(473)", session->getFdSocket());
 
-	std::string msg = Utils::getServerPrefix(server, session, "403") + session->getNickName() + " " + message.params[0] + " :No such channel" + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "473") + chan_name + " :Cannot join channel (+i)" + Reply::endr;
+	return(msg);
+}
+std::string Error::ERR_BADCHANNELKEY_475(Server *server, Session *session, std::string &chan_name)
+{
+	Debug::Reply("ERR_BADCHANNELKEY(475)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "475") + chan_name + " :Cannot join channel (+k)" + Reply::endr;
 	return(msg);
 }
 
-std::string ERR_NOTONCHANNEL_442(Server *server, Session *session, Message message)
+std::string Error::ERR_BADCHANMASK_476(Server *server, Session *session, std::string &chan_name)
 {
-	Debug::Reply("ERR_NOTONCHANNEL(442)", session->getFdSocket());
+	Debug::Reply("ERR_BADCHANMASK(476)", session->getFdSocket());
 
-	std::string msg = Utils::getServerPrefix(server, session, "442") + session->getNickName() + " " + message.params[0] + " :You're not on that channel" + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "476") + chan_name +  " :Bad Channel Mask" + Reply::endr;
 	return(msg);
 }

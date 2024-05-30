@@ -151,7 +151,13 @@ std::string	Command::quit(Server *server, Session *session, Message  message)
 	if(tmp_chan)
 	{
 		std::string chan_name = tmp_chan->get_name();
-		Utils::sendToChannel(server, tmp_chan, msg, chan_name);
+		if (tmp_chan->get_users().size() > 1)
+		{
+			Utils::sendToChannel(server, tmp_chan, session->getNickName(), msg, chan_name);
+			tmp_chan->rm_user(session->getNickName());
+		}
+		else
+			server->removeChannel(chan_name);
 	}
 		
 	// {
@@ -162,26 +168,33 @@ std::string	Command::quit(Server *server, Session *session, Message  message)
 		// 	server->getSession(lst_user[i])->addSendBuffer(msg);
 		// }
 	// }
+	std::cout << "DEBUG5" << std::endl;
 	server->killSession(session->getFdSocket(), true);
+	std::cout << "DEBUG6" << std::endl;
 	return("");
 }
 
-std::string	Command::notice(Server *server, Session *session, Message  message)
-{
-	if(session->getAuthenticated() == false)
-		return ("");
-	// If message.params[0] == & OU #, alors on boucle sur tous les utilisateurs de ce channel pour send le message
-	if (!server->getSession(message.params[0]))
-		return ("");
-	std::string	msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
-	//send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
-	server->getSession(message.params[0])->addSendBuffer(msg);
-	return ("");
-}
+// std::string	Command::notice(Server *server, Session *session, Message  message)
+// {
+// 	if(session->getAuthenticated() == false)
+// 		return ("");
+// 	// If message.params[0] == & OU #, alors on boucle sur tous les utilisateurs de ce channel pour send le message
+// 	if (!server->getSession(message.params[0]))
+// 		return ("");
+// 	std::string	msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
+// 	//send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+// 	server->getSession(message.params[0])->addSendBuffer(msg);
+// 	return ("");
+// }
 
 std::string	Command::privmsg(Server *server, Session *session, Message  message)
 {
 	std::string msg;
+	std::string command_name;
+	if(message.command == "PRIVMSG")
+		command_name = "PRIVMSG";
+	else
+		command_name = "NOTICE";
 	if(session->getAuthenticated() == false)
 		return ("");
 	if (message.params.size() > 2)
@@ -190,17 +203,34 @@ std::string	Command::privmsg(Server *server, Session *session, Message  message)
 		return (Error::ERR_NORECIPIENT_411(server, session, message));
 	if (message.payload.empty() && message.params.size() == 1)
 		return (Error::ERR_NOTEXTTOSNED_412(server, session, message));
-	// If message.params[0] == & OU #, alors on boucle sur tous les utilisateurs de ce channel pour send le message
-	if (!server->getSession(message.params[0]))
-		return (Error::ERR_NOSUCHNICK_401(server, session, message));
-	if (session->getAwayStatus() != "")
-		return (Reply::RPL_AWAY_301(server, session, message));
-	if(!message.payload.empty())
-		msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.payload + Reply::endr;
-	else if(!message.params[1].empty())
-		msg = Utils::getUserPrefix(server, session) + "PRIVMSG " + message.params[0] + " :" + message.params[1] + Reply::endr; //Add for more natural command line
+	if(message.params[0].find('#') != std::string::npos || message.params[0].find('&') != std::string::npos) //If PRIVMSG TO A CHANNEL
+	{
+		if (!Utils::isValidChannelName(message.params[0]))
+			return (Error::ERR_BADCHANMASK_476(server, session, message.params[0]));
+		Channel *target = server->getChannel(message.params[0].substr(message.params[0].find('#'))); //remove possible flags
+		if(target == NULL)
+			return(Error::ERR_NOSUCHCHANNEL_403(server, session, message));
+		if(session->getChannel() != target)
+			return(Error::ERR_CANNOTSENDTICHAN_404(server, session, message));
+		if(!message.payload.empty())
+			msg = Utils::getUserPrefix(server, session) + command_name + " " + message.params[0] + " :" + message.payload + Reply::endr;
+		if(!msg.empty())
+			Utils::sendToChannel(server, target, session->getNickName(),  msg, message.params[0]);
+	}
+	else //If PRIVMSG TO AN USER
+	{
+		if (!server->getSession(message.params[0]))
+			return (Error::ERR_NOSUCHNICK_401(server, session, message));
+		if (session->getAwayStatus() != "" && command_name != "NOTICE")
+			return (Reply::RPL_AWAY_301(server, session, message));
+		if(!message.payload.empty())
+			msg = Utils::getUserPrefix(server, session) + command_name + " " + message.params[0] + " :" + message.payload + Reply::endr;
+		else if(!message.params[1].empty())
+			msg = Utils::getUserPrefix(server, session) + command_name + " " + message.params[0] + " :" + message.params[1] + Reply::endr; //Add for more natural command line
 
-	server->getSession(message.params[0])->addSendBuffer(msg);
+		server->getSession(message.params[0])->addSendBuffer(msg);
+	}
+
 	return ("");
 }
 
@@ -238,46 +268,117 @@ std::string	Command::pong(Server *server, Session *session, Message  message)
 
 //CHANNELS-----------------------------------------------------
 
-	std::string	Command::part(Server *server, Session *session, Message  message)
+std::string	Command::part(Server *server, Session *session, Message  message)
 {
 	if(session->getAuthenticated() == false)
 		return ("");
-	if (!message.params.size())
+	if (message.params.size() < 1)
 		return (Error::ERR_NEEDMOREPARAMS_461(server, session, message));
-	if (message.params.size() > 1)
-		return ("");
-	try
+	std::string reason;
+	if (message.payload.empty())
+		reason = "Unknown";
+	else
+		reason = message.payload;
+	
+	Channel *channel = server->getChannel(message.params[0]);
+	if(channel == NULL)
+		return(Error::ERR_NOSUCHCHANNEL_403(server, session, message));
+	if(session->getChannel() != channel)
+		return(Error::ERR_NOTONCHANNEL_442(server,session,message));
+	if(channel->get_users().size() == 1)
 	{
-		std::map<std::string,Channel *> chans = server->getChannels();
-		Channel	*chan = chans[message.params[0]];
-		for (size_t i = 0; i < chan->get_nmemb(); i++)
+		session->setChannel(NULL);
+		server->removeChannel(channel->get_name());
+	}
+	else
+	{
+		std::vector<std::string> chan_users = channel->get_users();
+		for(size_t i = 0; i < chan_users.size(); i++)
 		{
-			if (chan->get_users()[i] == message.sender)
-			{
-				chan->rm_user(message.sender);
-				std::string	reason = "";
-				if (!message.payload.empty())
-					reason = " :" + message.payload;
-				//TO DO - send to channel
-				std::string	msg = Utils::getUserPrefix(server, session) + "PART " + message.params[0] + reason + Reply::endr;
-				session->addSendBuffer(msg);
-			}
+			// if(chan_users[i] != session->getNickName())
+			// {
+			std::string msg = Utils::getUserPrefix(server,session) + "PART " + channel->get_name() + " " + reason + Reply::endr;
+			server->getSession(chan_users[i])->addSendBuffer(msg);
+			// }
 		}
-		return (Error::ERR_NOTONCHANNEL_442(server, session, message));
 	}
-	catch (const std::exception& e)
+	return("");
+}
+
+std::string	Command::join(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return ("");
+	if(message.params.size() == 1 && message.params[0] == "0") // see RFC Join cmd
+		return(Command::part(server, session, message));
+	if(session->getChannel() != NULL)
+		return(Error::ERR_TOOMANYCHANNELS_405(server,session,message));
+	if(message.params.size() < 1)
+		return(Error::ERR_NEEDMOREPARAMS_461(server, session, message));
+	if(!Utils::isValidChannelName(message.params[0]))
+		return(Error::ERR_BADCHANMASK_476(server,session, message.params[0]));
+
+	if(message.params.size() == 1)
+		message.params.push_back(""); //add a blank password to channel
+	if(message.params.size() > 2) //if try to join more than a server
+		return(Error::ERR_TOOMANYCHANNELS_405(server,session,message));
+	Channel *target_chan;
+	target_chan = server->getChannel(message.params[0]);
+	bool newchan = false;
+	if(target_chan == NULL)
 	{
-		return (Error::ERR_NOSUCHCHANNEL_403(server, session, message));
+		newchan = true;
+		Debug::Info("Channel name not found, lets create a new one");
+		target_chan = new Channel(message.params[0], message.sender);
+		target_chan->add_op(session->getNickName());
+		target_chan->set_founder(session->getNickName());
+		server->addChannel(message.params[0], target_chan);
 	}
-}
-	
+	else if(!target_chan->get_pw().empty() && !target_chan->checkPw(message.params[1])) //if chan have a password and the password don't match
+		return(Error::ERR_BADCHANNELKEY_475(server, session, message.params[0]));
+	else if(target_chan->get_inviteonly() && target_chan->getUserInvited(session->getNickName()) == false)
+		return(Error::ERR_INVITEONLYCHAN_473(server, session, message.params[0]));
+	//Check max USER ????
+	target_chan->add_user(session->getNickName()); //Oui j'ai vu noé que tu renvoie un int, le probleme c'est que ça gere pas si le channel est en mode invite ou non
+	std::string join_msg = Utils::getUserPrefix(server, session) +  "JOIN " + message.params[0] + Reply::endr;
+	if(newchan == true)
+		join_msg += Utils::getUserPrefix(server, session) +  "MODE " + message.params[0] + " +o " + session->getNickName() + Reply::endr;//inform that the user who create the chan is op
+	Utils::sendToChannel(server, target_chan, session->getNickName(), join_msg, message.params[0]); //send join message of the user to all other users of this chan
+	session->setChannel(target_chan);
+	std::string msg = join_msg;
+	if(target_chan->get_topic() != "")
+	{
+		msg += Reply::RPL_TOPIC_332(server, session, target_chan) + Reply::RPL_TOPICWHOTIME_333(server, session, target_chan);
+	}
+	msg += Reply::RPL_NAMREPLY_353(server, session, target_chan);
+	msg += Reply::RPL_ENDOFNAMES_366(server, session, target_chan);
+	return(msg);
+
 }
 
-// std::string	Command::join(Server *server, Session *session, Message  message)
-// {
-
-	
-// }
+std::string	Command::who(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return ("");
+	if(message.params.empty())
+		return(Error::ERR_NEEDMOREPARAMS_461(server,session,message));
+	std::string msg;
+	if(message.params[0][0] == '#' || message.params[0][0] == '&')//If target is a channel
+	{
+		Channel *target_chan = server->getChannel(message.params[0]);
+		if(target_chan == NULL)
+			return(Error::ERR_NOSUCHCHANNEL_403(server, session, message));
+		msg = Reply::RPL_WHOREPLY_352(server, session,target_chan, NULL) + Reply::RPL_ENDOFWHO_315(server, session, message);
+	}
+	else
+	{
+		Session *target_session = server->getSession(message.params[0]);
+		if(target_session == NULL)
+			return(Error::ERR_NOSUCHNICK_401(server, session, message));
+		msg = Reply::RPL_WHOREPLY_352(server, session,NULL, target_session) + Reply::RPL_ENDOFWHO_315(server, session, message);
+	}
+	return(msg);
+}
 
 // std::string	Command::topic(Server *server, Session *session, Message  message)
 // {
@@ -363,11 +464,7 @@ std::string	Command::pong(Server *server, Session *session, Message  message)
 	
 // }
 
-// std::string	Command::who(Server *server, Session *session, Message  message)
-// {
 
-	
-// }
 
 // std::string	Command::whois(Server *server, Session *session, Message  message)
 // {
