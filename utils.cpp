@@ -91,37 +91,32 @@ void Utils::removeDuplicatesStr(std::vector<std::string>& vec)
     vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
 }
 //channel should contain the prefix ~#&...
-void Utils::sendToChannel(Server *server, Channel *channel, std::string &msg, std::string &channelname_with_flags_from_msg)
+void Utils::sendToChannel(Server *server, Channel *channel,std::string sender, std::string &msg, std::string &channelname_with_flags_from_msg)
 {
 	bool is_op = Utils::findFlag(channelname_with_flags_from_msg, '@');
-	bool is_protected = Utils::findFlag(channelname_with_flags_from_msg, '&');
 	bool is_founder = Utils::findFlag(channelname_with_flags_from_msg, '~');
 	std::vector<std::string> lst_user;
-	if(is_founder == false && is_protected == false && is_op == false)
-		lst_user = channel->get_users();	
-	// else
-	// {
-	// 	if(is_op)
-	// 	{
-	// 		std::vector<std::string> ops = channel->getOps();
-	// 		lst_user.insert(lst_user.end(), ops.begin(), ops.end());
-	// 	}
-	// 	if(is_protected)
-	// 	{
-	// 		std::vector<std::string> prot = channel->getProtected();
-	// 		lst_user.insert(lst_user.end(), prot.begin(), prot.end());
-	// 	}
-	// 	if(is_founder)
-	// 	{
-	// 		lst_user.push_back(channel->getFounder());
-	// 	}
-	// }
-	// Utils::removeDuplicatesStr(lst_user);
+	if(is_founder == false && is_op == false)
+		lst_user = channel->get_users();
+	else
+	{
+		if(is_op)
+		{
+			std::vector<std::string> ops = channel->get_operators();
+			lst_user.insert(lst_user.end(), ops.begin(), ops.end());
+		}
+		if(is_founder)
+		{
+			lst_user.push_back(channel->get_founder());
+		}
+	}
+	Utils::removeDuplicatesStr(lst_user);
 	if(channel)
 	{
 		for(size_t i = 0; i < lst_user.size(); i++)
 		{
-			server->getSession(lst_user[i])->addSendBuffer(msg);
+			if(lst_user[i] != sender)
+				server->getSession(lst_user[i])->addSendBuffer(msg);
 		}
 	}
 }
@@ -133,4 +128,29 @@ void Utils::sendBufferNow(Session *session)
 		send(session->getFdSocket(), session->getSendBuffer().c_str(), session->getSendBuffer().length(), MSG_NOSIGNAL);
 		session->getSendBuffer().clear();
 	}
+}
+bool Utils::isValidChannelName(const std::string& str) 
+{
+    // Check if the string has at least 2 characters
+    if (str.length() < 2) {
+        return false;
+    }
+
+    // Check if contain # or &
+	if(str.find('#') == std::string::npos && str.find('&') == std::string::npos)
+        return false;
+	bool flag_op = Utils::findFlag(str, '@');
+	bool flag_founder = Utils::findFlag(str, '~');
+	int total_flag = flag_op + flag_founder;
+
+	if(str[total_flag] != '#' && str[total_flag] != '&')
+		return(false);
+
+    // Check if all other characters are alphanumeric
+    for (size_t i = 1; i < str.length(); ++i) {
+        if (!std::isalnum(static_cast<unsigned char>(str[i])) && str[i] != '@' && str[i] != '~' && str[i] != '&' && str[i] != '#') 
+            return false;
+    }
+
+    return true;
 }

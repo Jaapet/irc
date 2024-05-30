@@ -20,7 +20,7 @@ namespace Command
 	std::string	pong(Server *server, Session *session, Message  message);
 	std::string	quit(Server *server, Session *session, Message  message);
 	std::string	privmsg(Server *server, Session *session, Message  message);
-	std::string	notice(Server *server, Session *session, Message  message);
+	// std::string	notice(Server *server, Session *session, Message  message);
 	//std::string	oper(Server *server, Session *session, Message  message);
 	//CHANNELS-----------------------------------------------------
 	std::string	join(Server *server, Session *session, Message  message);
@@ -39,7 +39,7 @@ namespace Command
 	// std::string	help(Server *server, Session *session, Message  message);
 	// std::string	help(Server *server, Session *session, Message  message);
 	// std::string	mode(Server *server, Session *session, Message  message);
-	// std::string	who(Server *server, Session *session, Message  message);
+	std::string	who(Server *server, Session *session, Message  message);
 	// std::string	whois(Server *server, Session *session, Message  message);
 	// std::string	away(Server *server, Session *session, Message  message);
 	// std::string	userhost(Server *server, Session *session, Message  message);

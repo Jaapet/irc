@@ -90,6 +90,8 @@ public:
 		{this->_realname = realname; this->_realname_is_set = true;}
 	void setWaitPong(void)
 		{this->_waitpong = true;}
+	void setChannel(Channel *channel)
+		{this->channel = channel;}
 
 	bool authenticate(void); //Every time this method is call it check if everything is meet for completing the auth; then return the correct 4 REPL
 
