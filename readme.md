@@ -6,3 +6,8 @@
 - [IRC Protocol](https://modern.ircdocs.horse/)
 - [Message Syntax](https://chi.cs.uchicago.edu/chirc/irc.html)
 - [IRC names](https://stackoverflow.com/a/31714099)
+
+
+# Issues
+
+list here all the issues

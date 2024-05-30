@@ -25,11 +25,11 @@ namespace Command
 	//CHANNELS-----------------------------------------------------
 	std::string	join(Server *server, Session *session, Message  message);
 	std::string	part(Server *server, Session *session, Message  message); //done, missing send to chan
-	std::string	topic(Server *server, Session *session, Message  message);
+	// std::string	topic(Server *server, Session *session, Message  message);
 	std::string	names(Server *server, Session *session, Message  message);
-	std::string	list(Server *server, Session *session, Message  message);
-	std::string	invite(Server *server, Session *session, Message  message);
-	std::string	kick(Server *server, Session *session, Message  message);
+	// std::string	list(Server *server, Session *session, Message  message);
+	// std::string	invite(Server *server, Session *session, Message  message);
+	// std::string	kick(Server *server, Session *session, Message  message);
 	// std::string	motd(Server *server, Session *session, Message  message);
 	// std::string	version(Server *server, Session *session, Message  message);
 	// std::string	admin(Server *server, Session *session, Message  message);
@@ -38,7 +38,7 @@ namespace Command
 	// std::string	stats(Server *server, Session *session, Message  message);
 	// std::string	help(Server *server, Session *session, Message  message);
 	// std::string	help(Server *server, Session *session, Message  message);
-	// std::string	mode(Server *server, Session *session, Message  message);
+	std::string	mode(Server *server, Session *session, Message  message);
 	std::string	who(Server *server, Session *session, Message  message);
 	// std::string	whois(Server *server, Session *session, Message  message);
 	// std::string	away(Server *server, Session *session, Message  message);

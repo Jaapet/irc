@@ -25,9 +25,9 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 
 	this->_servername = hostname;
 	this->_networkname = "NETWORK_NAME";
-	this->_version = "1234";
-	this->_available_user_modes = "AVAILABLE_USER_MODES";
-	this->_available_channel_modes = "AVAILABLE_CHANNEL_MODES";
+	this->_version = "ft_irc-1.0";
+	this->_available_user_modes = "*";
+	this->_available_channel_modes = "itkol";
 	this->_creation_date = Utils::getCurrentDate();
 	Debug::Info("Persue the server to not commit suicide");
 	this->_should_i_end_this_suffering = false;
@@ -136,6 +136,8 @@ void Server::mapCommands(void)
 	this->_commands["JOIN"] = &(Command::join);
 	this->_commands["PART"] = &(Command::part);
 	this->_commands["WHO"] = &(Command::who);
+	this->_commands["NAMES"] = &(Command::names);
+	this->_commands["MODE"] = &(Command::mode);
 	
 }
 
@@ -269,14 +271,14 @@ void Server::killSession(int const session_fd, bool erase_it)
 	FD_CLR(session_fd, &this->_write_sessions_fd);
 	if(shutdown(session_fd, SHUT_RDWR) == -1)
 	{
-		Debug::Error("Cannot shutdown session: " + session_fd);
+		Debug::Error("Cannot shutdown session: " + Utils::itoa(session_fd));
 		return;
 	}
 	delete (this->_sessions[session_fd]);
 	if(erase_it)
 		this->_sessions.erase(session_fd);
 	close(session_fd);
-	Debug::Success("Session closed");
+	Debug::Info("Session closed");
 }
 
 void Server::parseMessage(const std::string &message, Message &outmessage) 
@@ -394,27 +396,50 @@ std::vector<std::string>    Server::splitBuffer(std::string const &str)
 
 void Server::cleanExit(int exitcode)
 {
-	// for(size_t i = 0; i < this->_sessions.size(); i++)
-	// 	this->killSession(this->_sessions[i]->getFdSocket());
-	// for(size_t i = 0; i < this->_channels.size(); i++)
-		// this->rmchannel;
-
-	std::map<int, Session*>::iterator it;
-	if (this->_sessions.size() > 0)
+	//Clean Channels
+	std::map<std::string, Channel*>::iterator it1;
+	if (this->_channels.size() > 0)
 	{
-	    it = this->_sessions.begin();
-	    while (it != this->_sessions.end())
+	    it1 = this->_channels.begin();
+	    while (it1 != this->_channels.end())
 	    {
-	        Debug::Info("cleanExit() Killing session");
 	
 	        // Save the next iterator before erasing the current one
-	        std::map<int, Session*>::iterator toErase = it;
-	        ++it; // Move to the next element
+	        std::map<std::string, Channel*>::iterator toErase = it1;
+	        ++it1; // Move to the next element
 	
 	        // Perform the operation that removes the current element
 			if(toErase->second != NULL)
-	       		this->killSession(toErase->first, false);
-	        this->_sessions.erase(toErase); // Erase the element after moving the iterator
+			{
+				Debug::Info("cleanExit() Killing channels: " + toErase->second->get_name());
+				this->removeChannel(toErase->first);
+			}
+	       		
+	        this->_channels.erase(toErase->first); // Erase the element after moving the iterator
+	    }
+	}
+	//Clean Essions
+	std::map<int, Session*>::iterator it2;
+	if (this->_sessions.size() > 0)
+	{
+	    it2 = this->_sessions.begin();
+	    while (it2 != this->_sessions.end())
+	    {
+
+	       
+	
+	        // Save the next iterator before erasing the current one
+	        std::map<int, Session*>::iterator toErase = it2;
+	        ++it2; // Move to the next element
+	
+	        // Perform the operation that removes the current element
+			if(toErase->second != NULL)
+			{
+				Debug::Info("cleanExit() Killing session: " + toErase->second->getNickName());
+				this->killSession(toErase->first, false);
+			}
+	       		
+	        this->_sessions.erase(toErase->first); // Erase the element after moving the iterator
 	    }
 	}
 	this->_should_i_end_this_suffering = true;

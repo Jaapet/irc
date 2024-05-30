@@ -45,6 +45,24 @@ std::string Utils::getCurrentDate(void)
     return (dateString);
 }
 
+std::string Utils::getCurrentTimestamp() 
+{
+    std::time_t rawtime;
+    struct std::tm* timeinfo;
+    char buffer[80];
+
+    // Get the current time
+    std::time(&rawtime);
+
+    // Convert it to local time representation
+    timeinfo = std::localtime(&rawtime);
+
+    // Format the time as "YYYY-MM-DD HH:MM:SS"
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+    return std::string(buffer);
+}
+
 bool Utils::isAllowedNickCharacter(char const c)
 {
 	return (isalnum(c) || c == '[' || c == ']' || c == '{' || c == '}' || c == '\\' || c == '|' || c == '_' || c == '-');
@@ -90,7 +108,7 @@ void Utils::removeDuplicatesStr(std::vector<std::string>& vec)
     // Remove adjacent duplicates
     vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
 }
-//channel should contain the prefix ~#&...
+//channel should contain the prefix ~#&..., send sender "" to send it to also the sender
 void Utils::sendToChannel(Server *server, Channel *channel,std::string sender, std::string &msg, std::string &channelname_with_flags_from_msg)
 {
 	bool is_op = Utils::findFlag(channelname_with_flags_from_msg, '@');

@@ -19,7 +19,7 @@ private :
 	std::time_t topic_timestamp; // what time the topic was set
 	std::string founder;
 	size_t		max_users; // 0 means no limit
-	bool		op_topic; // ?
+	bool		op_topic; // topic restrict
 	bool		invite;
 
 	std::vector<std::string>	users;
@@ -28,6 +28,7 @@ private :
 
 	void	remove_normal_user(Session &user);
 	void	remove_operator(Session &user);
+	std::string creation_time_ts;
 
 public :
 	Channel(const std::string &name, const std::string &founder_nick);
@@ -47,14 +48,20 @@ public :
 	std::vector<std::string>	get_users(void){return(users);}; //NAMES
 	std::vector<std::string>	get_operators(void){return(operators);}; //OP
 	std::string					get_founder(void){return(founder);}; //Founder
-	size_t					get_nmemb(void){return(users.size());}; //LIST ; timestamp ?
+	size_t					get_nmemb(void){return(users.size());}; // Number of users
 	std::string				get_pw(void){return (this->pw);}
 	bool 					get_inviteonly(void){return(this->invite);}
+	bool 					get_topicrestricted(void){return(this->op_topic);}
+	size_t					get_maxusers(void){return (this->max_users);}
 	bool					getUserInvited(std::string const &nickname);
 	bool						is_op(std::string const &nickname);
+	bool						is_user(std::string const &nickname);
+	size_t					getMaxUsers(void){return(this->max_users);}
+	std::string				getCreationTimeTs(void){return(this->creation_time_ts);}
 
 	int		add_user(std::string const &nickname); //JOIN ; 0 if ok, 1 if not invited, 2 if already, 3 if full
 	void	add_op(std::string const &nickname){this->operators.push_back(nickname);}
+	void	rm_op(std::string const &nickname);
 	bool	rm_user(std::string const &nickname); //PART ; KICK ; false if user not in chan
 	void	invite_user(std::string const &nickname); //INVITE
 	bool	checkPw(std::string const &pw_to_try)
