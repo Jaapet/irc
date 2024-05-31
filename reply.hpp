@@ -17,6 +17,9 @@ namespace Reply
 	std::string RPL_MYINFO_004(Server *server, Session *session, Message message);
 	std::string RPL_AWAY_301(Server *server, Session *session, Message message);
 	std::string RPL_ENDOFWHO_315(Server *server, Session *session, Message message);
+	std::string RPL_LISTSTART_321(Server *server, Session *session);
+	std::string RPL_LIST_322(Server *server, Session *session, Channel *channel);
+	std::string RPL_LISTEND_323(Server *server, Session *session);
 	std::string RPL_CHANNELMODEIS_324(Server *server, Session *session, Message message);
 	std::string RPL_CREATIONTIME_329(Server *server, Session *session, Channel *channel);
 	std::string RPL_NOTOPIC_331(Server *server, Session *session, Channel *channel);
