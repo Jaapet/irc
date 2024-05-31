@@ -10,7 +10,7 @@ Session::Session(Server const *server_ptr): _server(server_ptr), _username("*"),
 	this->_user_is_set = false;
 	this->_sendBuffer.clear();
 	this->_lastpong = 0;
-	this->channel = NULL;
+	this->_channel = NULL;
 	this->_away_status = "";
 }
 
