@@ -29,25 +29,25 @@ namespace Command
 	std::string	topic(Server *server, Session *session, Message  message);
 	std::string	names(Server *server, Session *session, Message  message);
 	std::string	list(Server *server, Session *session, Message  message);
-	// std::string	invite(Server *server, Session *session, Message  message);
-	// std::string	kick(Server *server, Session *session, Message  message);
+	// std::string	invite(Server *server, Session *session, Message  message); //GG
+	// std::string	kick(Server *server, Session *session, Message  message);  //GG
 //Server Queries and Commands
-	// std::string	motd(Server *server, Session *session, Message  message);
-	// std::string	version(Server *server, Session *session, Message  message);
-	// std::string	admin(Server *server, Session *session, Message  message);
+	// std::string	motd(Server *server, Session *session, Message  message); //EF
+	// std::string	version(Server *server, Session *session, Message  message); //EF
+	// std::string	admin(Server *server, Session *session, Message  message); //EF
 	// std::string	connect(Server *server, Session *session, Message  message); // to throw an error
-	// std::string	lusers(Server *server, Session *session, Message  message);
-	// std::string	time(Server *server, Session *session, Message  message);
-	// std::string	stats(Server *server, Session *session, Message  message);
-	// std::string	help(Server *server, Session *session, Message  message);
-	// std::string	info(Server *server, Session *session, Message  message);
+	// std::string	lusers(Server *server, Session *session, Message  message); //GG
+	// std::string	time(Server *server, Session *session, Message  message); //EF
+	// std::string	stats(Server *server, Session *session, Message  message); //EF
+	// std::string	help(Server *server, Session *session, Message  message); //EF
+	// std::string	info(Server *server, Session *session, Message  message); //EF
 	std::string	mode(Server *server, Session *session, Message  message);
 //Sending Messages
 	std::string	privmsg(Server *server, Session *session, Message  message);
 	// std::string	notice(Server *server, Session *session, Message  message); // to throw an error
 //User-Based Queries
 	std::string	who(Server *server, Session *session, Message  message);
-	// std::string	whois(Server *server, Session *session, Message  message);
+	// std::string	whois(Server *server, Session *session, Message  message); //GG
 	// std::string	whowas(Server *server, Session *session, Message  message); // Not to do
 //Operator Messages
 	// std::string	kill(Server *server, Session *session, Message  message); // Not to do
@@ -55,8 +55,8 @@ namespace Command
 	// std::string	restart(Server *server, Session *session, Message  message); // Not to do
 	// std::string	squit(Server *server, Session *session, Message  message); // Not to do
 //Optional Messages
-	// std::string	away(Server *server, Session *session, Message  message);
+	// std::string	away(Server *server, Session *session, Message  message); //EF
 	// std::string	links(Server *server, Session *session, Message  message); // Not to do
-	// std::string	userhost(Server *server, Session *session, Message  message);
-	// std::string	wallops(Server *server, Session *session, Message  message);
+	// std::string	userhost(Server *server, Session *session, Message  message); //GG
+	// std::string	wallops(Server *server, Session *session, Message  message); //GG
 }
