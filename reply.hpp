@@ -16,6 +16,13 @@ namespace Reply
 	std::string RPL_CREATED_003(Server *server, Session *session, Message message);
 	std::string RPL_MYINFO_004(Server *server, Session *session, Message message);
 	std::string RPL_AWAY_301(Server *server, Session *session, Message message);
+	std::string RPL_WHOISREGNICK_307(Server *server, Session *session, std::string nickname);
+	std::string RPL_WHOISUSER_311(Server *server, Session *session, Session *target);
+	std::string RPL_WHOISSERVER_312(Server *server, Session *session, Session *target);
+	std::string RPL_WHOISSERVER_312(Server *server, Session *session, Session *target);
+	std::string RPL_WHOISCHANNELS_319(Server *server, Session *session, Session *target);
+	std::string RPL_WHOISSPECIAL_320(Server *server, Session *session, Session *target);
+
 	std::string RPL_ENDOFWHO_315(Server *server, Session *session, Message message);
 	std::string RPL_LISTSTART_321(Server *server, Session *session);
 	std::string RPL_LIST_322(Server *server, Session *session, Channel *channel);
@@ -25,6 +32,7 @@ namespace Reply
 	std::string RPL_NOTOPIC_331(Server *server, Session *session, Channel *channel);
 	std::string RPL_TOPIC_332(Server *server, Session *session, Channel *channel);
 	std::string RPL_TOPICWHOTIME_333(Server *server, Session *session, Channel *channel);
+	std::string RPL_INVITING_341(Server *server, Session *session, std::string nickname, std::string channel);
 	std::string RPL_WHOREPLY_352(Server *server, Session *session ,Channel *target_channel, Session *target_session);
 	std::string RPL_NAMREPLY_353(Server *server, Session *session, Channel *channel);
 	std::string RPL_ENDOFNAMES_366(Server *server, Session *session, std::string chan_name);

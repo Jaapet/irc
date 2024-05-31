@@ -485,17 +485,72 @@ std::string	Command::list(Server *server, Session *session, Message  message)
 	return(msg);
 }
 
-// std::string	Command::invite(Server *server, Session *session, Message  message)
-// {
-
+std::string	Command::invite(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return ("");
+	if(message.params.size() < 2)
+		return(Error::ERR_NEEDMOREPARAMS_461(server,session,message));
 	
-// }
+	if(server->getChannel(message.params[1]) == NULL)
+	{
+		Message tmp;
+		tmp = message;
+		tmp.params[0] = message.params[1];
+		return(Error::ERR_NOSUCHCHANNEL_403(server,session,tmp));
+	}
+	Channel *chan = server->getChannel(message.params[1]);
+	if(chan->get_inviteonly() == true && chan->is_op(session->getNickName()) == false)
+		return(Error::ERR_CHANOPRIVSNEEDED_482(server,session,message.params[1]));
+	if(server->getSession(message.params[0]) == NULL)
+		return(Error::ERR_NOSUCHNICK_401(server,session,message));
+	if(session->getChannel() != chan)
+	{
+		Message tmp;
+		tmp = message;
+		tmp.params[0] = message.params[1];
+		return(Error::ERR_NOTONCHANNEL_442(server,session,tmp));
+	}
+	if(chan->is_user(message.params[0]) == true)
+		return(Error::ERR_USERONCHANNEL_443(server,session,message.params[0],message.params[1]));
+	if(chan->get_inviteonly() == true && chan->is_op(session->getNickName()) == true)
+	{
+		chan->invite_user(message.params[0]);
+	}
+	std::string msg = Reply::RPL_INVITING_341(server,session,message.params[0],message.params[1]);
+	server->getSession(message.params[0])->addSendBuffer(msg);
+	return(msg);
+}
 
-// std::string	Command::kick(Server *server, Session *session, Message  message)
-// {
-
+std::string	Command::kick(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return ("");
+	if(message.params.size() < 2)
+		return(Error::ERR_NEEDMOREPARAMS_461(server,session,message));
+	if(server->getChannel(message.params[0]) == NULL)
+		return(Error::ERR_NOSUCHCHANNEL_403(server,session,message));
+	Channel *chan = server->getChannel(message.params[0]);
+	if(chan->is_op(session->getNickName()) == false)
+		return(Error::ERR_CHANOPRIVSNEEDED_482(server,session,message.params[1]));
+	if(session->getChannel() != chan)
+		return(Error::ERR_NOTONCHANNEL_442(server,session,message));
+	if(chan->is_user(message.params[1]) == false)
+		return(Error::ERR_USERNOTINCHANNEL_441(server,session,message.params[1],message.params[0]));
+	std::string reason;
+	if(message.payload.empty())
+		reason = " Reason not known";
+	else
+		reason = " " + message.payload;
 	
-// }
+	
+	std::string msg = Utils::getUserPrefix(server,session) + "KICK " + message.params[0] + " " + message.params[1] + reason + Reply::endr;
+	Utils::sendToChannel(server,chan,session->getNickName(),msg,message.params[0]);
+	chan->rm_user(message.params[1]);
+	server->getSession(message.params[1])->setChannel(NULL);
+	return(msg);
+
+}
 
 // std::string	Command::motd(Server *server, Session *session, Message  message)
 // {
@@ -661,11 +716,35 @@ std::string	Command::mode(Server *server, Session *session, Message  message)
 
 
 
-// std::string	Command::whois(Server *server, Session *session, Message  message)
-// {
-
-	
-// }
+std::string	Command::whois(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return ("");
+	if(message.params.empty())
+		return(Error::ERR_NEEDMOREPARAMS_461(server,session,message));
+	if(message.params.size() == 2)
+		return(Error::ERR_NOSUCHSERVER_402(server,session,message));
+	Session *target = server->getSession(message.params[0]);
+	if(target == NULL)
+		return(Error::ERR_NOSUCHNICK_401(server,session,message));
+	std::string msg;
+	// RPL_WHOISCERTFP (276). SSL certs not supported
+	msg += Reply::RPL_WHOISREGNICK_307(server,session,target->getNickName());
+	msg += Reply::RPL_WHOISUSER_311(server,session,target);
+	msg += Reply::RPL_WHOISSERVER_312(server,session,target);
+	// RPL_WHOISOPERATOR (313), server wide operator are not supported
+	// RPL_WHOISIDLE (317), idle status is not supported
+	msg += Reply::RPL_WHOISCHANNELS_319(server,session,target);
+	msg += Reply::RPL_WHOISSPECIAL_320(server,session,target);
+	// RPL_WHOISACCOUNT (330), SASL not supported
+	// RPL_WHOISACTUALLY (338), Why bothering with that, all clients are localhost
+	// RPL_WHOISHOST (378), Why bothering with that, all clients are localhost
+	// RPL_WHOISMODES (379), no user mode supported
+	// RPL_WHOISSECURE (671), SSL not supported
+	if(target->getAwayStatus() != "")
+		msg += Reply::RPL_AWAY_301(server,session,message);
+	return(msg);
+}
 
 
 // std::string	Command::away(Server *server, Session *session, Message  message)
@@ -680,8 +759,19 @@ std::string	Command::mode(Server *server, Session *session, Message  message)
 	
 // }
 
-// std::string	Command::wallops(Server *server, Session *session, Message  message)
-// {
-
+std::string	Command::wallops(Server *server, Session *session, Message  message)
+{
+	if(message.payload.empty())
+		return(Error::ERR_NEEDMOREPARAMS_461(server,session,message));
 	
-// }
+	std::map<int,Session *> all = server->getSessions();
+	std::map<int,Session *>::iterator it = all.begin();
+	std::string msg = "WALLOPS :" + message.payload + Reply::endr;
+	while(it != all.end())
+	{
+		if(it->second != NULL)
+			it->second->addSendBuffer(msg);
+		it++;
+	}
+	return("");
+}

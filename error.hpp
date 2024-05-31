@@ -19,7 +19,9 @@ namespace Error
 	std::string ERR_UNKNOWNCOMMAND_421(Server *server, Session *session, Message message);
 	std::string ERR_ERRONEUSNICKNAME_432(Server *server, Session *session, Message message);
 	std::string ERR_NICKNAMEINUSE_433(Server *server, Session *session, Message message);
+	std::string ERR_USERNOTINCHANNEL_441(Server *server, Session *session, std::string nickuser, std::string channel);
 	std::string ERR_NOTONCHANNEL_442(Server *server, Session *session, Message message);
+	std::string ERR_USERONCHANNEL_443(Server *server, Session *session, std::string nickname, std::string channel);
 	std::string ERR_NEEDMOREPARAMS_461(Server *server, Session *session, Message message);
 	std::string ERR_ALREADYREGISTRED_462(Server *server, Session *session);
 	std::string ERR_PASSWDMISMATCH_464(Server *server, Session *session);

@@ -51,10 +51,28 @@ std::string Reply::RPL_AWAY_301(Server *server, Session *session, Message messag
 {
 	Debug::Reply("ERR_NOTEXTTOSNED(301)", session->getFdSocket());
 
-	std::string msg = Utils::getServerPrefix(server, session, "301") + session->getNickName() + " " + message.params[0] + " :" + session->getAwayStatus() + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "301") + message.params[0] + " :" + session->getAwayStatus() + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_WHOISREGNICK_307(Server *server, Session *session, std::string nickname)
+{
+	Debug::Reply("RPL_WHOISREGNICK(307)", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server, session, "307") + nickname + " :has identified for this nick" + Reply::endr;
 	return(msg);
 }
 
+std::string Reply::RPL_WHOISUSER_311(Server *server, Session *session, Session *target)
+{
+	Debug::Reply("RPL_WHOISUSER(311)", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server, session, "311") + target->getNickName() + " " + target->getUserName() + " " + server->getHostName() + " * :" + target->getRealName() + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_WHOISSERVER_312(Server *server, Session *session, Session *target)
+{
+	Debug::Reply("RPL_WHOISSERVER(312)", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server, session, "312") + target->getNickName() + " " + server->getHostName() + " :" + server->getInfo() + Reply::endr;
+	return(msg);
+}
 std::string Reply::RPL_ENDOFWHO_315(Server *server, Session *session, Message message)
 {
 	Debug::Reply("RPL_ENDOFWHO(315)", session->getFdSocket());
@@ -62,6 +80,32 @@ std::string Reply::RPL_ENDOFWHO_315(Server *server, Session *session, Message me
 	msg = Utils::getServerPrefix(server, session, "315") + message.params[0] + " :End of WHO list" + Reply::endr;
 	return(msg);
 }
+std::string Reply::RPL_WHOISCHANNELS_319(Server *server, Session *session, Session *target)
+{
+	Debug::Reply("RPL_WHOISCHANNELS(319)", session->getFdSocket());
+	if(target->getChannel() == NULL)
+		return("");
+	std::string op;
+	if(target->getChannel()->is_op(target->getNickName()) == true)
+		op = "@";
+	std::string msg = Utils::getServerPrefix(server, session, "319") + target->getNickName() + " :" + op + target->getChannel()->get_name() + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_WHOISSPECIAL_320(Server *server, Session *session, Session *target)
+{
+	Debug::Reply("RPL_WHOISSPECIAL(320)", session->getFdSocket());
+	std::string special = "All user cannot be server wide operator nor idle, this functionality is not supported";
+	if(target->getNickName() == "edfirmin")
+		special = "Some people says that I look like the donkey in Schreck, I'm not dubed by Eddie Murphy";
+	if(target->getNickName() == "ggualerz")
+		special = "Yes it's me who wrote terrible things on WHOIS cmd for edfirmin && ndesprez";
+	if(target->getNickName() == "ndesprez")
+		special = "I did a tmongell on this project, it's my repository but I will probably never read those lines";
+	std::string msg;
+	msg = Utils::getServerPrefix(server, session, "320") + target->getNickName() + " :" + special + Reply::endr;
+	return(msg);
+}
+
 std::string Reply::RPL_LISTSTART_321(Server *server, Session *session)
 {
 	Debug::Reply("RPL_LISTSTART(321)", session->getFdSocket());
@@ -149,6 +193,13 @@ std::string Reply::RPL_TOPICWHOTIME_333(Server *server, Session *session, Channe
 	Debug::Reply("RPL_TOPICWHOTIME(333)", session->getFdSocket());
 
 	std::string msg = Utils::getServerPrefix(server, session, "333") + channel->get_name() + " " + channel->get_topic_user() + " " + channel->get_topic_timestamp() +  Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_INVITING_341(Server *server, Session *session, std::string nickname, std::string channel)
+{
+	Debug::Reply("RPL_INVITING(341)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "341") + nickname + " " + channel +  Reply::endr;
 	return(msg);
 }
 //target_channel || target_session, one should be NULL, if all are null, will send all the user of the server like a WHO 0
