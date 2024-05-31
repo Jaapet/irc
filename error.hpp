@@ -9,6 +9,7 @@ struct Message;
 namespace Error
 {
 	std::string ERR_NOSUCHNICK_401(Server *server, Session *session, Message message);
+	std::string ERR_NOSUCHSERVER_402(Server *server, Session *session, Message message);
 	std::string ERR_NOSUCHCHANNEL_403(Server *server, Session *session, Message message);
 	std::string ERR_CANNOTSENDTICHAN_404(Server *server, Session *session, Message message);
 	std::string ERR_TOOMANYCHANNELS_405(Server *server, Session *session, Message message);
@@ -25,5 +26,6 @@ namespace Error
 	std::string ERR_INVITEONLYCHAN_473(Server *server, Session *session, std::string &chan_name);
 	std::string ERR_BADCHANNELKEY_475(Server *server, Session *session, std::string &chan_name);
 	std::string ERR_BADCHANMASK_476(Server *server, Session *session, std::string &chan_name);
+	std::string ERR_NOPRIVILEGES_481(Server *server, Session *session, Message message);
 
 }

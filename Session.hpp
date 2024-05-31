@@ -91,7 +91,7 @@ public:
 	void setWaitPong(void)
 		{this->_waitpong = true;}
 	void setChannel(Channel *channel)
-		{this->channel = channel;}
+		{this->_channel = channel;}
 
 	bool authenticate(void); //Every time this method is call it check if everything is meet for completing the auth; then return the correct 4 REPL
 
