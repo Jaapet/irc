@@ -57,8 +57,36 @@ std::string Reply::RPL_AWAY_301(Server *server, Session *session, Message messag
 
 std::string Reply::RPL_ENDOFWHO_315(Server *server, Session *session, Message message)
 {
+	Debug::Reply("RPL_ENDOFWHO(315)", session->getFdSocket());
 	std::string msg;
 	msg = Utils::getServerPrefix(server, session, "315") + message.params[0] + " :End of WHO list" + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_LISTSTART_321(Server *server, Session *session)
+{
+	Debug::Reply("RPL_LISTSTART(321)", session->getFdSocket());
+
+	std::string msg;
+	msg = Utils::getServerPrefix(server, session, "321") + "Channel :Users  Name" + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_LIST_322(Server *server, Session *session, Channel *channel)
+{
+	Debug::Reply("RPL_LIST(322)", session->getFdSocket());
+
+	std::string msg;
+	std::string topic = channel->get_topic();
+	if(topic == "")
+		topic = "No topic set";
+	msg = Utils::getServerPrefix(server, session, "322") + channel->get_name() + " " + Utils::itoa(channel->get_nmemb()) + " :" + topic + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_LISTEND_323(Server *server, Session *session)
+{
+	Debug::Reply("RPL_LISTEND(323)", session->getFdSocket());
+
+	std::string msg;
+	msg = Utils::getServerPrefix(server, session, "323") +  ":End of /LIST" + Reply::endr;
 	return(msg);
 }
 std::string Reply::RPL_CHANNELMODEIS_324(Server *server, Session *session, Message message)

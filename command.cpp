@@ -445,11 +445,45 @@ std::string	Command::names(Server *server, Session *session, Message  message)
 	return(msg);
 }
 
-// std::string	Command::list(Server *server, Session *session, Message  message)
-// {
+std::string	Command::list(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return ("");
+	std::map<std::string,Channel *> channels = server->getChannels();
+	std::map<std::string,Channel *>::iterator it = channels.begin();
+	std::string msg;
+	size_t channel_cout = 0;
+	if(message.params.empty())
+	{
+		while(it != channels.end())
+		{
+			if(it->second != NULL)
+			{
+				channel_cout++;
+				msg += Reply::RPL_LIST_322(server,session, it->second);
+			}
+			it++;
+		}
+		if(channel_cout > 0)
+			msg = Reply::RPL_LISTSTART_321(server,session) + msg + Reply::RPL_LISTEND_323(server,session);
+		else
+			msg = Reply::RPL_LISTEND_323(server,session);
 
-	
-// }
+	}
+	else
+	{
+		std::vector<std::string> chan_lst = Utils::split(message.params[0], ',');
+		for(size_t i = 0; i < chan_lst.size(); i++)
+		{
+			if(server->getChannel(chan_lst[i]) == NULL)
+				msg += Error::ERR_NOSUCHCHANNEL_403(server,session,message);
+			else
+				msg += Reply::RPL_LIST_322(server,session,server->getChannel(chan_lst[i]));
+		}
+		msg = Reply::RPL_LISTSTART_321(server,session) + msg + Reply::RPL_LISTEND_323(server,session);
+	}
+	return(msg);
+}
 
 // std::string	Command::invite(Server *server, Session *session, Message  message)
 // {
