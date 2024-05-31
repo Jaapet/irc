@@ -20,9 +20,6 @@ namespace Command
 	std::string	pong(Server *server, Session *session, Message  message);
 	std::string	quit(Server *server, Session *session, Message  message);
 	std::string	privmsg(Server *server, Session *session, Message  message);
-	// std::string	notice(Server *server, Session *session, Message  message); //Use privmsg instead
-	//std::string	oper(Server *server, Session *session, Message  message); //Not needed
-	//CHANNELS-----------------------------------------------------
 	std::string	join(Server *server, Session *session, Message  message);
 	std::string	part(Server *server, Session *session, Message  message);
 	std::string	topic(Server *server, Session *session, Message  message);
