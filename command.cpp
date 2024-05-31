@@ -308,7 +308,7 @@ std::string	Command::join(Server *server, Session *session, Message  message)
 	target_chan->add_user(session->getNickName()); //Oui j'ai vu noé que tu renvoie un int, le probleme c'est que ça gere pas si le channel est en mode invite ou non
 	std::string join_msg = Utils::getUserPrefix(server, session) +  "JOIN " + message.params[0] + Reply::endr;
 	if(newchan == true)
-		join_msg += ":" + server->getServerName() + +  "MODE " + message.params[0] + " +o " + session->getNickName() + Reply::endr;//inform that the user who create the chan is op
+		join_msg += ":" + server->getServerName() + " MODE " + message.params[0] + " +o " + session->getNickName() + Reply::endr;//inform that the user who create the chan is op
 	Utils::sendToChannel(server, target_chan, session->getNickName(), join_msg, message.params[0]); //send join message of the user to all other users of this chan
 	session->setChannel(target_chan);
 	std::string msg = join_msg;
