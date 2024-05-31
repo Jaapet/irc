@@ -6,7 +6,7 @@
 /*   By: edfirmin <edfirmin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/30 14:03:15 by edfirmin          #+#    #+#             */
-/*   Updated: 2024/05/31 17:37:57 by edfirmin         ###   ########.fr       */
+/*   Updated: 2024/05/31 17:50:58 by edfirmin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,11 @@ int main(int argc, char **argv)
         buff[j - 1] = '\0';
         
         std::cout << buff << std::endl;
+        mes = "QUIT";
+        send(bot_sock, mes.c_str(), std::strlen(mes.c_str()), 0);
+        size_t k = recv(bot_sock, buff, sizeof(buff) - 1, 0);
+        buff[k - 1] = '\0';
+        
         shutdown(bot_sock, SHUT_RDWR);
     }
     catch(const std::exception& e)
