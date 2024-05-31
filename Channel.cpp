@@ -101,15 +101,26 @@ bool	Channel::rm_user(std::string const &nickname)
 {
 	std::string temp;
 
-	for (size_t i = 0; i < this->users.size(); i++)
+	// for (size_t i = 0; i < this->users.size(); i++)
+	// {
+	// 	if (this->users[i] == nickname)
+	// 	{
+	// 		this->users[i] = this->users[get_nmemb() - 1];
+	// 		this->users[get_nmemb() - 1] = nickname;
+	// 		this->users.pop_back();
+	// 		return (true);
+	// 	}
+	// }
+
+	std::vector<std::string>::iterator it = this->users.begin();
+	while(it != this->users.end())
 	{
-		if (this->users[i] == nickname)
+		if(it->data() == nickname)
 		{
-			this->users[i] = this->users[get_nmemb() - 1];
-			this->users[get_nmemb() - 1] = nickname;
-			this->users.pop_back();
-			return (true);
+			this->users.erase(it);
+			return(true);
 		}
+		it++;
 	}
 	return (false);
 }

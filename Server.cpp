@@ -202,12 +202,27 @@ void Server::handleReadEvents(int cur_fd)
 	if (nbytes == 0)
 	{
 		Debug::Warning("Connection closed by: " + std::string(inet_ntoa(this->_sessions[cur_fd]->_address_socket.sin_addr)) + " Attempting to close the session server side");
-		this->killSession(cur_fd);
+		Session *sess_tmp = this->_sessions[cur_fd];
+		if(sess_tmp)
+		{
+			Message mess_tmp;
+			mess_tmp.payload = "Connection closed without QUIT";
+			Command::quit(this, sess_tmp, mess_tmp);
+		}
+		
+		// this->killSession(cur_fd);
 	}
 	else if (nbytes < 0)
 	{
 		Debug::Warning("Error with a packet from: " + std::string(inet_ntoa(this->_sessions[cur_fd]->_address_socket.sin_addr)) + " closing the connection...");
-		this->killSession(cur_fd);
+		Session *sess_tmp = this->_sessions[cur_fd];
+		if(sess_tmp)
+		{
+			Message mess_tmp;
+			mess_tmp.payload = "Connection closed without QUIT";
+			Command::quit(this, sess_tmp, mess_tmp);
+		}
+		// this->killSession(cur_fd);
 	}
 	else
 	{
@@ -270,10 +285,7 @@ void Server::killSession(int const session_fd, bool erase_it)
 	FD_CLR(session_fd, &this->_read_sessions_fd);
 	FD_CLR(session_fd, &this->_write_sessions_fd);
 	if(shutdown(session_fd, SHUT_RDWR) == -1)
-	{
-		Debug::Error("Cannot shutdown session: " + Utils::itoa(session_fd));
-		return;
-	}
+		Debug::Error("Cannot properly shutdown session: " + Utils::itoa(session_fd));
 	delete (this->_sessions[session_fd]);
 	if(erase_it)
 		this->_sessions.erase(session_fd);

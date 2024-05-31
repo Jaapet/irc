@@ -253,19 +253,18 @@ std::string	Command::part(Server *server, Session *session, Message  message)
 	if(channel->get_users().size() == 1)
 	{
 		session->setChannel(NULL);
+		std::string msg = Utils::getUserPrefix(server,session) + "PART " + channel->get_name() + " " + reason + Reply::endr;
 		server->removeChannel(channel->get_name());
+		return(msg);
 	}
 	else
 	{
-		std::vector<std::string> chan_users = channel->get_users();
-		for(size_t i = 0; i < chan_users.size(); i++)
-		{
-			// if(chan_users[i] != session->getNickName())
-			// {
-			std::string msg = Utils::getUserPrefix(server,session) + "PART " + channel->get_name() + " " + reason + Reply::endr;
-			server->getSession(chan_users[i])->addSendBuffer(msg);
-			// }
-		}
+		channel->rm_user(session->getNickName());
+		session->setChannel(NULL);
+		
+		std::string msg = Utils::getUserPrefix(server,session) + "PART " + channel->get_name() + " " + reason + Reply::endr;
+		Utils::sendToChannel(server,channel,session->getNickName(), msg, message.params[0]);
+		return(msg);
 	}
 	return("");
 }
@@ -332,6 +331,7 @@ std::string	Command::who(Server *server, Session *session, Message  message)
 	if(message.params[0] == "0" && message.params.size() == 1)
 	{
 		msg = Reply::RPL_WHOREPLY_352(server, session,NULL, NULL) + Reply::RPL_ENDOFWHO_315(server, session, message);
+		return(msg);
 	}
 	else if(message.params[0][0] == '#' || message.params[0][0] == '&')//If target is a channel
 	{

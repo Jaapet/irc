@@ -181,14 +181,26 @@ std::string Reply::RPL_WHOREPLY_352(Server *server, Session *session ,Channel *t
 std::string Reply::RPL_NAMREPLY_353(Server *server, Session *session, Channel *channel)
 {
 	Debug::Reply("RPL_NAMREPLY(353)", session->getFdSocket());
-	std::string msg = Utils::getServerPrefix(server,session,"353") + "= " + channel->get_name();
+	std::string msg = Utils::getServerPrefix(server,session,"353") + "= " + channel->get_name() + " :";
 	std::vector<std::string> users = channel->get_users();
 	for(size_t i = 0; i < users.size(); i++)
 	{
-		if(channel->is_op(users[i]))
-			msg += " @" + users[i];
+		if(i == 0)
+		{
+			if(channel->is_op(users[i]))
+				msg += "@" + users[i];
+			else
+				msg += users[i];
+
+		}
 		else
-			msg += " " + users[i];
+		{
+			if(channel->is_op(users[i]))
+				msg += " @" + users[i];
+			else
+				msg += " " + users[i];
+		}
+
 	}
 	msg += Reply::endr;
 	return(msg);
