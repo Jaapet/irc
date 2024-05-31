@@ -30,10 +30,12 @@ bool Session::authenticate(void)
 	
 }
 
+
 // int	Session::join_chan(Channel &chan, std::string &pass)
 // {
 // 	return (chan.add_user(this->_nickname));
 // }
+
 
 // bool	Session::quit_chan(Channel &chan)
 // {

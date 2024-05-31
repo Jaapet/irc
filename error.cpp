@@ -78,6 +78,7 @@ std::string Error::ERR_ERRONEUSNICKNAME_432(Server *server, Session *session, Me
 	return(msg);	
 }
 
+
 std::string Error::ERR_NICKNAMEINUSE_433(Server *server, Session *session, Message message)
 {
 	Debug::Reply("ERR_NICKNAMEINUSE(433)", session->getFdSocket());
@@ -136,5 +137,22 @@ std::string Error::ERR_BADCHANMASK_476(Server *server, Session *session, std::st
 	Debug::Reply("ERR_BADCHANMASK(476)", session->getFdSocket());
 
 	std::string msg = Utils::getServerPrefix(server, session, "476") + chan_name +  " :Bad Channel Mask" + Reply::endr;
+	return(msg);
+}
+
+std::string Error::ERR_NOSUCHSERVER_402(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOSUCHSERVER(402)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "402") + session->getNickName() + " " + message.params[0] + " :No such server" + Reply::endr;
+	return(msg);
+}
+
+std::string Error::ERR_NOPRIVILEGES_481(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOPRIVILEGES(481)", session->getFdSocket());
+
+	(void)message;
+	std::string msg = Utils::getServerPrefix(server, session, "481") + session->getNickName() + " :Permission Denied - You're not an IRC operator" + Reply::endr;
 	return(msg);
 }

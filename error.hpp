@@ -25,5 +25,5 @@ namespace Error
 	std::string ERR_INVITEONLYCHAN_473(Server *server, Session *session, std::string &chan_name);
 	std::string ERR_BADCHANNELKEY_475(Server *server, Session *session, std::string &chan_name);
 	std::string ERR_BADCHANMASK_476(Server *server, Session *session, std::string &chan_name);
-	
+
 }
