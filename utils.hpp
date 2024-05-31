@@ -39,5 +39,6 @@ namespace Utils
 	    return oss.str();
 	}
 	bool isValidChannelName(const std::string& str);
+	std::vector<std::string> split(const std::string& str, char delimiter);
 
 }
