@@ -32,6 +32,7 @@ bool Session::authenticate(void)
 
 int	Session::join_chan(Channel &chan, std::string &pass)
 {
+	(void)pass;
 	return (chan.add_user(this->_nickname));
 }
 

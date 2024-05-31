@@ -38,7 +38,7 @@ private:
 	std::time_t _lastpong;
 	std::string	_away_status;
 
-	Channel	*channel;
+	Channel	*_channel;
 	//.. Add whatever you need
 
 public:
@@ -71,7 +71,7 @@ public:
 		bool getWaitPong(void)
 			{return(this->_waitpong);}
 		Channel *getChannel(void)
-			{return(this->channel);}
+			{return(this->_channel);}
 		//Socket info
 		socklen_t getLenSocket(void) const
 			{return (sizeof(_address_socket));}

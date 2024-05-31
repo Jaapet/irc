@@ -41,7 +41,7 @@ void	Channel::set_invite(const bool &invite)
 
 bool	Channel::is_op(std::string const &nickname)
 {
-	for (int i = 0; i < this->operators.size(); i++)
+	for (size_t i = 0; i < this->operators.size(); i++)
 	{
 		if (this->operators[i] == nickname)
 			return (true);
@@ -68,7 +68,7 @@ bool	Channel::rm_user(std::string const &nickname)
 {
 	std::string temp;
 
-	for (int i = 0; i < this->users.size(); i++)
+	for (size_t i = 0; i < this->users.size(); i++)
 	{
 		if (this->users[i] == nickname)
 		{
@@ -83,7 +83,7 @@ bool	Channel::rm_user(std::string const &nickname)
 
 void	Channel::invite_user(std::string const &nickname)
 {
-	for (int i = 0; i < this->invited_users.size(); i++)
+	for (size_t i = 0; i < this->invited_users.size(); i++)
 	{
 		if (this->invited_users[i] == nickname)
 			return ;

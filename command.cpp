@@ -125,20 +125,17 @@ std::string	Command::user(Server *server, Session *session, Message message)
 	
 // }
 
-std::string	Command::error(Server *server, Session *session, Message  message)
+std::string	Command::squit(Server *server, Session *session, Message  message)
 {
-	(void)server;
-	if(session->getAuthenticated() == false || message.payload.empty())
-		return("");
-	return("Error: " + message.payload + "\n");
-}
-
-std::string	Command::error_v2(Server *server, Session *session, Message  message)
-{
-	(void)server;
-	if(session->getAuthenticated() == false || message.payload.empty())
-		return("");
-	return("Error :" + Command::quit(server, session, message) + Reply::endr);
+	if (session->getAuthenticated() == false)
+		return ("");
+	if (message.params.size() < 1)
+		return (Error::ERR_NEEDMOREPARAMS_461(server, session, message));
+	else if (message.params[0].compare(server->getServerName()))
+		return (Error::ERR_NOSUCHSERVER_402(server, session, message));
+	// if (session->getIRC_Op() == false)
+	// 	return (Error::ERR_NOPRIVILEGES_481(server, session, message));
+	return ("");
 }
 
 std::string	Command::quit(Server *server, Session *session, Message  message)
@@ -172,11 +169,10 @@ std::string	Command::notice(Server *server, Session *session, Message  message)
 
 std::string	Command::privmsg(Server *server, Session *session, Message  message)
 {
-	std::string msg;
 	if(session->getAuthenticated() == false)
 		return ("");
 	if (message.params.size() > 2)
-		return (Error::ERR_TOOMENYTARGETS_407(server, session, message));
+		return (Error::ERR_TOOMANYTARGETS_407(server, session, message));
 	if (message.params.size() == 0)
 		return (Error::ERR_NORECIPIENT_411(server, session, message));
 	if (message.payload.empty() && message.params.size() == 1)

@@ -5,7 +5,8 @@
 #include "Message.hpp"
 #include "Session.hpp"
 #include "Server.hpp"
-class Message;
+class Channel;
+struct Message;
 class Server;
 class Session;
 namespace Utils

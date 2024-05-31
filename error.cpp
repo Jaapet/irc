@@ -57,7 +57,7 @@ std::string Error::ERR_NOSUCHNICK_401(Server *server, Session *session, Message 
 	return(msg);
 }
 
-std::string Error::ERR_TOOMENYTARGETS_407(Server *server, Session *session, Message message)
+std::string Error::ERR_TOOMANYTARGETS_407(Server *server, Session *session, Message message)
 {
 	Debug::Reply("ERR_TOOMENYTARGETS(407)", session->getFdSocket());
 
@@ -87,5 +87,22 @@ std::string Error::RPL_AWAY_301(Server *server, Session *session, Message messag
 	Debug::Reply("ERR_NOTEXTTOSNED(301)", session->getFdSocket());
 
 	std::string msg = Utils::getServerPrefix(server, session, "301") + session->getNickName() + " " + message.params[0] + " :" + session->getAwayStatus() + Reply::endr;
+	return(msg);
+}
+
+std::string Error::ERR_NOSUCHSERVER_402(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOSUCHSERVER(402)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "402") + session->getNickName() + " " + message.params[0] + " :No such server" + Reply::endr;
+	return(msg);
+}
+
+std::string Error::ERR_NOPRIVILEGES_481(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_NOPRIVILEGES(481)", session->getFdSocket());
+
+	(void)message;
+	std::string msg = Utils::getServerPrefix(server, session, "481") + session->getNickName() + " :Permission Denied - You're not an IRC operator" + Reply::endr;
 	return(msg);
 }
