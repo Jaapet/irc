@@ -98,10 +98,16 @@ std::string Reply::RPL_CREATIONTIME_329(Server *server, Session *session, Channe
 {
 	Debug::Reply("RPL_CREATIONTIME(329)", session->getFdSocket());
 
-	std::string msg = Utils::getServerPrefix(server, session, "329") + channel->get_name() + " " + channel->getCreationTimeTs() + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "329") + channel->get_name() + " " + channel->get_topic_user() +" "+  channel->getCreationTimeTs() + Reply::endr;
 	return(msg);
 }
+std::string Reply::RPL_NOTOPIC_331(Server *server, Session *session, Channel *channel)
+{
+	Debug::Reply("RPL_NOTOPIC(331)", session->getFdSocket());
 
+	std::string msg = Utils::getServerPrefix(server, session, "331") + channel->get_name() + " :No topic is set" + Reply::endr;
+	return(msg);
+}
 std::string Reply::RPL_TOPIC_332(Server *server, Session *session, Channel *channel)
 {
 	Debug::Reply("RPL_TOPIC(332)", session->getFdSocket());
@@ -114,7 +120,7 @@ std::string Reply::RPL_TOPICWHOTIME_333(Server *server, Session *session, Channe
 {
 	Debug::Reply("RPL_TOPICWHOTIME(333)", session->getFdSocket());
 
-	std::string msg = Utils::getServerPrefix(server, session, "333") + channel->get_name() + " " + channel->get_topic_user() + Utils::itoa(channel->get_topic_timestamp()) +  Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "333") + channel->get_name() + " " + channel->get_topic_user() + " " + channel->get_topic_timestamp() +  Reply::endr;
 	return(msg);
 }
 //target_channel || target_session, one should be NULL, if all are null, will send all the user of the server like a WHO 0

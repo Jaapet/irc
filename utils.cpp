@@ -48,19 +48,9 @@ std::string Utils::getCurrentDate(void)
 std::string Utils::getCurrentTimestamp() 
 {
     std::time_t rawtime;
-    struct std::tm* timeinfo;
-    char buffer[80];
-
-    // Get the current time
+    // Get the current time as a Unix timestamp
     std::time(&rawtime);
-
-    // Convert it to local time representation
-    timeinfo = std::localtime(&rawtime);
-
-    // Format the time as "YYYY-MM-DD HH:MM:SS"
-    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
-
-    return std::string(buffer);
+    return (Utils::itoa(rawtime));
 }
 
 bool Utils::isAllowedNickCharacter(char const c)

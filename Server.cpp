@@ -138,6 +138,7 @@ void Server::mapCommands(void)
 	this->_commands["WHO"] = &(Command::who);
 	this->_commands["NAMES"] = &(Command::names);
 	this->_commands["MODE"] = &(Command::mode);
+	this->_commands["TOPIC"] = &(Command::topic);
 	
 }
 

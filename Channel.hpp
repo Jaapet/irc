@@ -16,7 +16,7 @@ private :
 	std::string	pw; // empty means no password
 	std::string	topic; // Topic of the chan
 	std::string topic_user; //who set the last the topic
-	std::time_t topic_timestamp; // what time the topic was set
+	std::string topic_timestamp; // what time the topic was set
 	std::string founder;
 	size_t		max_users; // 0 means no limit
 	bool		op_topic; // topic restrict
@@ -35,7 +35,7 @@ public :
 	~Channel();
 	void	set_name(const std::string &name);
 	void	set_pw(const std::string &pw);
-	void	set_topic(const std::string &topic); //TOPIC ; if empty string, clears the topic
+	void	set_topic(const std::string &topic, const std::string &user);
 	void	set_max_users(const size_t &max_users);
 	void	set_op_topic(const bool &op_topic);
 	void	set_invite(const bool &invite);
@@ -44,7 +44,7 @@ public :
 	std::string					get_name(void){return(name);}; //TOPIC
 	std::string					get_topic(void){return(topic);}; //TOPIC
 	std::string					get_topic_user(void){return(topic_user);}
-	std::time_t					get_topic_timestamp(void){return(topic_timestamp);}
+	std::string						get_topic_timestamp(void){return(topic_timestamp);}
 	std::vector<std::string>	get_users(void){return(users);}; //NAMES
 	std::vector<std::string>	get_operators(void){return(operators);}; //OP
 	std::string					get_founder(void){return(founder);}; //Founder

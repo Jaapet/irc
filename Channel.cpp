@@ -27,9 +27,11 @@ void	Channel::set_pw(const std::string &pw)
 	this->pw = pw;
 }
 
-void	Channel::set_topic(const std::string &topic)
+void	Channel::set_topic(const std::string &topic, const std::string &user)
 {
 	this->topic = topic;
+	this->topic_timestamp = Utils::getCurrentTimestamp();
+	this->topic_user = user;
 }
 
 void	Channel::set_max_users(const size_t &max_users)

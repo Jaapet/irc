@@ -350,11 +350,41 @@ std::string	Command::who(Server *server, Session *session, Message  message)
 	return(msg);
 }
 
-// std::string	Command::topic(Server *server, Session *session, Message  message)
-// {
+std::string	Command::topic(Server *server, Session *session, Message  message)
+{
+	if(session->getAuthenticated() == false)
+		return ("");
+	if(message.params.size() == 0)
+		return(Error::ERR_NEEDMOREPARAMS_461(server,session,message));
+	Channel *chan = server->getChannel(message.params[0]);
+	if(chan == NULL)
+		return(Error::ERR_NOSUCHCHANNEL_403(server,session,message));
+	if(session->getChannel() != chan)
+		return(Error::ERR_NOTONCHANNEL_442(server,session,message));
+	//reply chan topic 
+	if(message.params.size() == 1 && message.payload.empty())
+	{
+		if(chan->get_topic() == "")
+			return(Reply::RPL_NOTOPIC_331(server,session,chan));
+		return(Reply::RPL_TOPIC_332(server,session,chan) + Reply::RPL_TOPICWHOTIME_333(server,session,chan));
+	}
+	if(message.params.size() == 1 && !message.payload.empty())
+	{
+		if(chan->get_topicrestricted() == true && chan->is_op(session->getNickName()) == false)
+			return(Error::ERR_CHANOPRIVSNEEDED_482(server,session,message.params[0]));
+		std::string topic;
+		if(message.payload == ":")
+			topic = "";
+		else
+			topic = message.payload;
+		chan->set_topic(topic, session->getNickName());
 
-	
-// }
+		std::string msg = Utils::getUserPrefix(server,session) + "TOPIC " + chan->get_name() + " " + message.payload + Reply::endr;
+		Utils::sendToChannel(server,chan,session->getNickName(),msg,message.params[0]);
+		return(msg);
+	}
+	return("");
+}
 
 std::string	Command::names(Server *server, Session *session, Message  message)
 {
