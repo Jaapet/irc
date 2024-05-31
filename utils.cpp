@@ -162,3 +162,17 @@ bool Utils::isValidChannelName(const std::string& str)
 
     return true;
 }
+
+std::vector<std::string> Utils::split(const std::string& str, char delimiter) 
+{
+    std::vector<std::string> tokens;
+    std::stringstream ss(str);
+    std::string token;
+
+    while (std::getline(ss, token, delimiter)) 
+	{
+        tokens.push_back(token);
+    }
+
+    return tokens;
+}
