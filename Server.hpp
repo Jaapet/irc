@@ -110,7 +110,11 @@ public:
 			{return (BUFFER_SIZE);}
 		int  getBackLog(void) const
 			{return (BACKLOG);}
-		
+
+		std::map<std::string,Channel *> const &getChannels(void) const
+			{return (this->_channels);}
+		Channel *getChannel(std::string channel_name);
+
 		
 	//Setters
 
@@ -120,9 +124,14 @@ public:
 		bool checkPassword(std::string passwordToCheck) const
 			{return (passwordToCheck == this->_password);}
 		void killSession(int const session_fd);
+		void killSession(int const session_fd, bool erase_it);
 		Session *getSession(std::string const &nickname);
 		//Messages
 		std::vector<std::string>    splitBuffer(std::string const &str);
 		void parseMessage(const std::string &message, Message &outmessage);
 		void cleanExit(int exitcode);
+		//Channels
+		void addChannel(std::string chan_name, Channel *channel)
+			{this->_channels[chan_name] = channel;}
+		void removeChannel(std::string chan_name);
 };

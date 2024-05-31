@@ -1,6 +1,8 @@
 #include "Server.hpp"
 #include "Session.hpp"
 #include "Message.hpp"
+#include "error.hpp"
+#include "reply.hpp"
 #include <fcntl.h>
 #include <cstring>
 #include <ctime>
@@ -21,7 +23,7 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 	this->_select_timeout.tv_sec = 1;
 	this->_select_timeout.tv_usec = 0;
 
-	this->_servername = "PEPPA_IRC";
+	this->_servername = hostname;
 	this->_networkname = "NETWORK_NAME";
 	this->_version = "1234";
 	this->_available_user_modes = "AVAILABLE_USER_MODES";
@@ -131,8 +133,11 @@ void Server::mapCommands(void)
 	this->_commands["PONG"] = &(Command::pong);
 	this->_commands["QUIT"] = &(Command::quit);
 	this->_commands["PRIVMSG"] = &(Command::privmsg);
-	this->_commands["NOTICE"] = &(Command::notice);
-	//this->_commands["ERROR"] = &(Command::error);
+	this->_commands["NOTICE"] = &(Command::privmsg); //Pourquoi pas launch la cmd PRIVMSG
+	this->_commands["JOIN"] = &(Command::join);
+	this->_commands["PART"] = &(Command::part);
+	this->_commands["WHO"] = &(Command::who);
+	
 }
 
 
@@ -234,7 +239,7 @@ void Server::executeCommands(std::vector<std::string> command_to_execute, int cu
 			else if(this->_commands[tmp_msg.command] != NULL)
 				this->_sessions[cur_fd]->getSendBuffer() += this->_commands[tmp_msg.command](this, this->_sessions[cur_fd], tmp_msg);
 			else
-				this->_sessions[cur_fd]->getSendBuffer() += "ADD HERE CORRECT REPLY COMMAND NOT FOUND";
+				this->_sessions[cur_fd]->getSendBuffer() += Error::ERR_UNKNOWNCOMMAND_421(this, this->_sessions[cur_fd], tmp_msg);
 		}
 	}
 }
@@ -251,19 +256,26 @@ void Server::handleWriteEvents(int cur_fd)
 //PUBLIC METHODS//////////////////////////////////////////////////////
 void Server::killSession(int const session_fd)
 {
-	std::string tmp((inet_ntoa(this->_sessions[session_fd]->_address_socket.sin_addr)));
+	this->killSession(session_fd, true);
+}
+void Server::killSession(int const session_fd, bool erase_it)
+{
+	
 
+	//send waiting buffer
+	Utils::sendBufferNow(this->_sessions[session_fd]);
+	FD_CLR(session_fd, &this->_read_sessions_fd);
+	FD_CLR(session_fd, &this->_write_sessions_fd);
 	if(shutdown(session_fd, SHUT_RDWR) == -1)
 	{
 		Debug::Error("Cannot shutdown session: " + session_fd);
 		return;
 	}
 	delete (this->_sessions[session_fd]);
-	this->_sessions.erase(session_fd);
+	if(erase_it)
+		this->_sessions.erase(session_fd);
 	close(session_fd);
-	FD_CLR(session_fd, &this->_read_sessions_fd);
-	FD_CLR(session_fd, &this->_write_sessions_fd);
-	Debug::Success("Session closed from: " + tmp);
+	Debug::Success("Session closed");
 }
 
 void Server::parseMessage(const std::string &message, Message &outmessage) 
@@ -387,20 +399,29 @@ void Server::cleanExit(int exitcode)
 		// this->rmchannel;
 
 	std::map<int, Session*>::iterator it;
-	if(this->_sessions.size() > 0)
+	if (this->_sessions.size() > 0)
 	{
-		for (it = this->_sessions.begin(); it != this->_sessions.end(); ++it)
-		{
-			Debug::Info("[cleanExit] Killing session: " + it->first);
-			this->killSession(it->first);
-		}
-			
+	    it = this->_sessions.begin();
+	    while (it != this->_sessions.end())
+	    {
+	        Debug::Info("cleanExit() Killing session");
+	
+	        // Save the next iterator before erasing the current one
+	        std::map<int, Session*>::iterator toErase = it;
+	        ++it; // Move to the next element
+	
+	        // Perform the operation that removes the current element
+			if(toErase->second != NULL)
+	       		this->killSession(toErase->first, false);
+	        this->_sessions.erase(toErase); // Erase the element after moving the iterator
+	    }
 	}
-    
 	this->_should_i_end_this_suffering = true;
 	try
 	{
+		Debug::Info("Attempt to close server Fd");
 		close(this->getFdSocket());
+		Debug::Info("Attempt to shutdown server socket");
 		shutdown(this->getFdSocket(), SHUT_RDWR);
 	}
 	catch(const std::exception& e)
@@ -409,6 +430,29 @@ void Server::cleanExit(int exitcode)
 		std::exit(1);
 	}
 	
-	
+	Debug::Success("Server is successfully closed");
 	std::exit(exitcode);
 }
+
+Channel *Server::getChannel(std::string channel_name)
+{
+	try
+	{
+		return(this->_channels.at(channel_name));
+	}
+	catch(const std::exception& e)
+	{
+		return(NULL);
+	}
+}
+
+void Server::removeChannel(std::string chan_name)
+{
+	std::vector<std::string> users = this->_channels.at(chan_name)->get_users();
+	for(size_t i = 0; i < users.size(); i++)
+	{
+		this->getSession(users[i])->setChannel(NULL);
+	}
+	delete this->_channels.at(chan_name);
+ 	this->_channels.erase(chan_name);
+}	

@@ -1,10 +1,17 @@
 #include "Channel.hpp"
 
-Channel::Channel (std::string const &name)
+Channel::Channel (std::string const &name, std::string const &founder)
 {
 	this->name = name;
+	this->founder = founder;
 	this->op_topic = false;
 	this->invite = false;
+	this->topic = "";
+}
+
+Channel::~Channel ()
+{
+
 }
 
 void	Channel::set_name(const std::string &name)
@@ -22,7 +29,7 @@ void	Channel::set_topic(const std::string &topic)
 	this->topic = topic;
 }
 
-void	Channel::set_max_users(const u_int16_t &max_users)
+void	Channel::set_max_users(const size_t &max_users)
 {
 	this->max_users = max_users;
 }
@@ -54,12 +61,12 @@ bool	Channel::is_op(std::string const &nickname)
 
 int	Channel::add_user(std::string const &nickname)
 {
-	if (this->invite && *std::find(this->invited_users.begin(), this->invited_users.end(), nickname) != nickname)
-		return (1);
-	if (*std::find(this->users.begin(), this->users.end(), nickname) == nickname)
-		return (2);
-	if (this->users.size() >= this->max_users && this->max_users)
-		return (3);
+	// if (this->invite && *std::find(this->invited_users.begin(), this->invited_users.end(), nickname) != nickname)
+	// 	return (1);
+	// if (*std::find(this->users.begin(), this->users.end(), nickname) == nickname)
+	// 	return (2);
+	// if (this->users.size() >= this->max_users && this->max_users)
+	// 	return (3);
 	this->users.push_back(nickname);
 	return (0);
 }
@@ -89,4 +96,14 @@ void	Channel::invite_user(std::string const &nickname)
 			return ;
 	}
 	this->invited_users.push_back(nickname);
+}
+
+bool	Channel::getUserInvited(std::string const &nickname)
+{
+	for (size_t i = 0; i < this->invited_users.size(); i++)
+	{
+		if (this->invited_users[i] == nickname)
+			return true;
+	}
+	return false;
 }
