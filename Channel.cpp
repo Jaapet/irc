@@ -6,7 +6,10 @@ Channel::Channel (std::string const &name, std::string const &founder)
 	this->founder = founder;
 	this->op_topic = false;
 	this->invite = false;
+	this->pw = "";
 	this->topic = "";
+	this->max_users = 0;
+	this->creation_time_ts = Utils::getCurrentTimestamp();
 }
 
 Channel::~Channel ()
@@ -24,9 +27,11 @@ void	Channel::set_pw(const std::string &pw)
 	this->pw = pw;
 }
 
-void	Channel::set_topic(const std::string &topic)
+void	Channel::set_topic(const std::string &topic, const std::string &user)
 {
 	this->topic = topic;
+	this->topic_timestamp = Utils::getCurrentTimestamp();
+	this->topic_user = user;
 }
 
 void	Channel::set_max_users(const size_t &max_users)
@@ -56,6 +61,27 @@ bool	Channel::is_op(std::string const &nickname)
 	return (false);
 }
 
+bool	Channel::is_user(std::string const &nickname)
+{
+	for (size_t i = 0; i < this->users.size(); i++)
+	{
+		if (this->users[i] == nickname)
+			return (true);
+	}
+	return (false);
+}
+
+void	Channel::rm_op(std::string const &nickname)
+{
+	std::vector<std::string>::iterator it = std::find(this->operators.begin(),this->operators.end(),nickname);
+	if(it != this->operators.end())
+	{
+		Debug::Warning("Remove a channel op his nickname is:" + nickname);
+		this->operators.erase(it);
+	}
+	else
+		Debug::Warning("Tried to remove an op who is not in the op list");
+}
 
 //-----------------------------------------------------------------------------------------------
 
