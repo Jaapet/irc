@@ -45,6 +45,7 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 		
 		Debug::Header();
 		Debug::Success("Launching of " + this->getHostName() + " IRC server was sucessfull " + Utils::getCurrentDate());
+		//g_sev = this;
 		this->handleConnections();//loop until ctrl-c
 	}
 	catch(const std::exception& e)
@@ -155,7 +156,6 @@ void Server::handleConnections(void)
 		write_fd_cpy = this->_write_sessions_fd;
 		if(select(fd_max + 1, &read_fd_cpy, &write_fd_cpy, NULL, &this->_select_timeout) == -1) //select between read & write fdp with a specified timeout
 			throw(Server::SelectCallError()); 
-
 		for(int i = 0; i <= fd_max; i++)
 		{	
 			if(FD_ISSET(i, &read_fd_cpy)) //Check if FD is in the SET, first itteration trigger the server fd, then all fd put with FD_SET
@@ -171,7 +171,6 @@ void Server::handleConnections(void)
 		if(ctrlc_pressed)
 			this->_should_i_end_this_suffering = true;
 	}
-
 }
 void Server::handleNewSession(int &fd_max)
 {
