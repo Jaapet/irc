@@ -4,6 +4,8 @@
 #include <iostream>
 #include <sstream>
 #include <ctime>
+#include <iomanip>
+
 #include "Message.hpp"
 #include "Session.hpp"
 #include "Server.hpp"
@@ -18,6 +20,7 @@ namespace Utils
 	std::string strToUpper(std::string const &str);
 
 	std::string getCurrentDate(void);
+	std::string getCurrentTimestamp();
 
 	bool isAllowedNickCharacter(char const c);
 	bool findChar(std::string &str, char &c);

@@ -23,9 +23,13 @@ namespace Error
 	std::string ERR_NEEDMOREPARAMS_461(Server *server, Session *session, Message message);
 	std::string ERR_ALREADYREGISTRED_462(Server *server, Session *session);
 	std::string ERR_PASSWDMISMATCH_464(Server *server, Session *session);
+	std::string ERR_CHANNELISFULL_471(Server *server, Session *session, std::string &chan_name);
 	std::string ERR_INVITEONLYCHAN_473(Server *server, Session *session, std::string &chan_name);
 	std::string ERR_BADCHANNELKEY_475(Server *server, Session *session, std::string &chan_name);
 	std::string ERR_BADCHANMASK_476(Server *server, Session *session, std::string &chan_name);
 	std::string ERR_NOPRIVILEGES_481(Server *server, Session *session, Message message);
+	std::string ERR_CHANOPRIVSNEEDED_482(Server *server, Session *session, std::string &chan_name);
+	std::string ERR_UMODEUNKNOWNFLAG_501(Server *server, Session *session);
+	std::string ERR_INVALIDMODEPARAM_696(Server *server, Session *session, Message *message,std::string description);
 
 }

@@ -61,10 +61,56 @@ std::string Reply::RPL_ENDOFWHO_315(Server *server, Session *session, Message me
 	msg = Utils::getServerPrefix(server, session, "315") + message.params[0] + " :End of WHO list" + Reply::endr;
 	return(msg);
 }
+std::string Reply::RPL_CHANNELMODEIS_324(Server *server, Session *session, Message message)
+{
+	Debug::Reply("RPL_CHANNELMODEIS(324)", session->getFdSocket());
 
+	std::string msg = Utils::getServerPrefix(server,session,"324") + message.params[0];
+
+	std::string mode_str = " +";
+	std::string mode_arg = "";
+	if(server->getChannel(message.params[0])->get_inviteonly() == true)
+		mode_str += "i";
+	if(server->getChannel(message.params[0])->get_topicrestricted() == true)
+		mode_str += "t";
+	if(server->getChannel(message.params[0])->get_pw() != "")
+	{
+		mode_str += "k";
+		if(mode_arg != "")
+			mode_arg += " ";
+		mode_arg += server->getChannel(message.params[0])->get_pw();
+	}
+	if(server->getChannel(message.params[0])->get_maxusers() > 0)
+	{
+		mode_str += "l";
+		if(mode_arg != "")
+			mode_arg += " ";
+		mode_arg += Utils::itoa(server->getChannel(message.params[0])->get_maxusers());
+	}
+	if(mode_str != " +")
+		msg += mode_str + " " + mode_arg;
+	msg += Reply::endr;
+	return(msg);
+
+}
+
+std::string Reply::RPL_CREATIONTIME_329(Server *server, Session *session, Channel *channel)
+{
+	Debug::Reply("RPL_CREATIONTIME(329)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "329") + channel->get_name() + " " + channel->get_topic_user() +" "+  channel->getCreationTimeTs() + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_NOTOPIC_331(Server *server, Session *session, Channel *channel)
+{
+	Debug::Reply("RPL_NOTOPIC(331)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "331") + channel->get_name() + " :No topic is set" + Reply::endr;
+	return(msg);
+}
 std::string Reply::RPL_TOPIC_332(Server *server, Session *session, Channel *channel)
 {
-	Debug::Reply("RPL_TOPIC_332(332)", session->getFdSocket());
+	Debug::Reply("RPL_TOPIC(332)", session->getFdSocket());
 
 	std::string msg = Utils::getServerPrefix(server, session, "332") + channel->get_name() + " :" + channel->get_topic() + Reply::endr;
 	return(msg);
@@ -74,10 +120,10 @@ std::string Reply::RPL_TOPICWHOTIME_333(Server *server, Session *session, Channe
 {
 	Debug::Reply("RPL_TOPICWHOTIME(333)", session->getFdSocket());
 
-	std::string msg = Utils::getServerPrefix(server, session, "333") + channel->get_name() + " " + channel->get_topic_user() + Utils::itoa(channel->get_topic_timestamp()) +  Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "333") + channel->get_name() + " " + channel->get_topic_user() + " " + channel->get_topic_timestamp() +  Reply::endr;
 	return(msg);
 }
-//target_channel || target_session, one should be NULL
+//target_channel || target_session, one should be NULL, if all are null, will send all the user of the server like a WHO 0
 std::string Reply::RPL_WHOREPLY_352(Server *server, Session *session ,Channel *target_channel, Session *target_session)
 {
 	std::string msg;
@@ -88,13 +134,35 @@ std::string Reply::RPL_WHOREPLY_352(Server *server, Session *session ,Channel *t
 		Debug::Warning("Invalide use of Reply::RPL_WHOREPLY_352()");
 		return("");
 	}
-	if(target_session != NULL)
+	else if (target_channel == NULL && target_session == NULL) // For WHO 0 (Not support by HexChat but can be used by the bot)
+	{
+		std::map<int, Session*> sessions = server->getSessions();
+		std::map<int, Session*>::iterator it;
+
+		if (sessions.size() > 0)
+		{
+		    it = sessions.begin();
+		    while (it != sessions.end())
+		    {
+				if(it->second != NULL)
+				{
+					flag = "H";
+					if(it->second->getAwayStatus() != "")
+						flag = "G";
+					msg += Utils::getServerPrefix(server, session, "352") + "* " + it->second->getUserName() + " " + server->getHostName() + " " + server->getServerName() + " " + it->second->getNickName() + " " + flag + " :0 " + it->second->getRealName() + Reply::endr;
+		        ++it;
+				}
+				
+		    }
+		}
+	}
+	else if(target_session != NULL)
 	{
 		if(target_session->getAwayStatus() != "")
 			flag = "G"; 
 		msg += Utils::getServerPrefix(server, session, "352") + "* " + target_session->getUserName() + " " + server->getHostName() + " " + server->getServerName() + " " + target_session->getNickName() + " " + flag + " :0 " + target_session->getRealName() + Reply::endr;
 	}
-	if(target_channel != NULL)
+	else if(target_channel != NULL)
 	{
 		std::vector<std::string> users = target_channel->get_users();
 		for(size_t i = 0; i < users.size(); i++)
@@ -113,7 +181,7 @@ std::string Reply::RPL_WHOREPLY_352(Server *server, Session *session ,Channel *t
 std::string Reply::RPL_NAMREPLY_353(Server *server, Session *session, Channel *channel)
 {
 	Debug::Reply("RPL_NAMREPLY(353)", session->getFdSocket());
-	std::string msg = Utils::getServerPrefix(server,session,"353") + "= " + channel->get_name() + " " + session->getNickName();
+	std::string msg = Utils::getServerPrefix(server,session,"353") + "= " + channel->get_name();
 	std::vector<std::string> users = channel->get_users();
 	for(size_t i = 0; i < users.size(); i++)
 	{
@@ -126,10 +194,10 @@ std::string Reply::RPL_NAMREPLY_353(Server *server, Session *session, Channel *c
 	return(msg);
 }
 
-std::string Reply::RPL_ENDOFNAMES_366(Server *server, Session *session, Channel *channel)
+std::string Reply::RPL_ENDOFNAMES_366(Server *server, Session *session, std::string chan_name)
 {
 	Debug::Reply("RPL_ENDOFNAMES(366)", session->getFdSocket());
-	std::string msg = Utils::getServerPrefix(server,session,"366") + channel->get_name() + " :End of /NAMES list" + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server,session,"366") + chan_name + " :End of /NAMES list" + Reply::endr;
 
 	return(msg);
 }
