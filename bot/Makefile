@@ -6,11 +6,11 @@
 #    By: edfirmin <edfirmin@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/30 14:02:35 by edfirmin          #+#    #+#              #
-#    Updated: 2024/05/31 15:12:01 by edfirmin         ###   ########.fr        #
+#    Updated: 2024/05/31 18:35:56 by edfirmin         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-SRCS = main.cpp ../irc/Server.cpp 
+SRCS = main.cpp
 NAME = bot_irc
 CC = c++
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -pedantic -g

@@ -159,7 +159,7 @@ std::string Reply::RPL_WHOREPLY_352(Server *server, Session *session ,Channel *t
 	Debug::Reply("RPL_WHOREPLY(352)", session->getFdSocket());
 	if(target_channel != NULL && target_session != NULL)
 	{
-		Debug::Warning("Invalide use of Reply::RPL_WHOREPLY_352()");
+		Debug::Warning("Invalid use of Reply::RPL_WHOREPLY_352()");
 		return("");
 	}
 	else if (target_channel == NULL && target_session == NULL) // For WHO 0 (Not support by HexChat but can be used by the bot)
@@ -178,8 +178,9 @@ std::string Reply::RPL_WHOREPLY_352(Server *server, Session *session ,Channel *t
 					if(it->second->getAwayStatus() != "")
 						flag = "G";
 					msg += Utils::getServerPrefix(server, session, "352") + "* " + it->second->getUserName() + " " + server->getHostName() + " " + server->getServerName() + " " + it->second->getNickName() + " " + flag + " :0 " + it->second->getRealName() + Reply::endr;
-		        ++it;
+		        
 				}
+				++it;
 				
 		    }
 		}

@@ -11,3 +11,6 @@
 # Issues
 
 list here all the issues
+
+/part
+/join error too many chan

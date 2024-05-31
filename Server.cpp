@@ -375,7 +375,7 @@ Session *Server::getSession(std::string const &nickname)
     Session* foundSession = NULL;
 	for (it = this->_sessions.begin(); it != this->_sessions.end(); ++it) 
 	{
-    	if (Utils::strToUpper(it->second->getNickName()) == Utils::strToUpper(nickname)) 
+    	if (it->second != NULL && Utils::strToUpper(it->second->getNickName()) == Utils::strToUpper(nickname)) 
 		{
             foundSession = it->second;
             break;

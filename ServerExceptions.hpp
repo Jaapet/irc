@@ -44,3 +44,11 @@ class DuplicatedSessionFd : public std::exception {
 		return("Duplicate session fd or a ghost session");
 	}
 };
+
+class BotCreationFail : public std::exception {
+	public:
+	const char *what() const throw()
+	{
+		return("Bot connection to the serv. fail");
+	}
+};
