@@ -53,6 +53,7 @@ private:
 	std::string _available_user_modes;
 	std::string _available_channel_modes;
 	std::string _creation_date;
+	std::string _info;
 
 	bool _should_i_end_this_suffering; //Bool set to true to kill the server
 	
@@ -96,6 +97,8 @@ public:
 			{return (this->_available_channel_modes);}
 		std::string const &getCreationDate(void) const
 			{return (this->_creation_date);}
+		std::string const &getInfo(void) const
+			{return (this->_info);}
 		bool getKill(void) const
 			{return (this->_should_i_end_this_suffering);}
 		//Socket

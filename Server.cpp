@@ -29,6 +29,7 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 	this->_available_user_modes = "*";
 	this->_available_channel_modes = "itkol";
 	this->_creation_date = Utils::getCurrentDate();
+	this->_info = "This server run on ft_irc project binary, it was made by edfirmin ggualerzi and ndesprez for a 42 project. This server app doesnt handle SASL, SSL, MultiServer, server wide operator or idle";
 	Debug::Info("Persue the server to not commit suicide");
 	this->_should_i_end_this_suffering = false;
 	
@@ -141,6 +142,10 @@ void Server::mapCommands(void)
 	this->_commands["MODE"] = &(Command::mode);
 	this->_commands["TOPIC"] = &(Command::topic);
 	this->_commands["LIST"] = &(Command::list);
+	this->_commands["INVITE"] = &(Command::invite);
+	this->_commands["KICK"] = &(Command::kick);
+	this->_commands["WHOIS"] = &(Command::whois);
+	this->_commands["WALLOPS"] = &(Command::wallops);
 	
 }
 
@@ -428,7 +433,7 @@ void Server::cleanExit(int exitcode)
 				this->removeChannel(toErase->first);
 			}
 	       		
-	        this->_channels.erase(toErase->first); // Erase the element after moving the iterator
+	        // this->_channels.erase(toErase); // Erase the element after moving the iterator
 	    }
 	}
 	//Clean Essions

@@ -29,8 +29,8 @@ namespace Command
 	std::string	topic(Server *server, Session *session, Message  message);
 	std::string	names(Server *server, Session *session, Message  message);
 	std::string	list(Server *server, Session *session, Message  message);
-	// std::string	invite(Server *server, Session *session, Message  message); //GG
-	// std::string	kick(Server *server, Session *session, Message  message);  //GG
+	std::string	invite(Server *server, Session *session, Message  message);
+	std::string	kick(Server *server, Session *session, Message  message);
 //Server Queries and Commands
 	// std::string	motd(Server *server, Session *session, Message  message); //EF
 	// std::string	version(Server *server, Session *session, Message  message); //EF
@@ -44,10 +44,10 @@ namespace Command
 	std::string	mode(Server *server, Session *session, Message  message);
 //Sending Messages
 	std::string	privmsg(Server *server, Session *session, Message  message);
-	// std::string	notice(Server *server, Session *session, Message  message); // to throw an error
+	// std::string	notice(Server *server, Session *session, Message  message); // use privmsg instead
 //User-Based Queries
 	std::string	who(Server *server, Session *session, Message  message);
-	// std::string	whois(Server *server, Session *session, Message  message); //GG
+	std::string	whois(Server *server, Session *session, Message  message);
 	// std::string	whowas(Server *server, Session *session, Message  message); // Not to do
 //Operator Messages
 	// std::string	kill(Server *server, Session *session, Message  message); // Not to do
@@ -57,6 +57,6 @@ namespace Command
 //Optional Messages
 	// std::string	away(Server *server, Session *session, Message  message); //EF
 	// std::string	links(Server *server, Session *session, Message  message); // Not to do
-	// std::string	userhost(Server *server, Session *session, Message  message); //GG
-	// std::string	wallops(Server *server, Session *session, Message  message); //GG
+	// std::string	userhost(Server *server, Session *session, Message  message); //Giga flemme, GG
+	std::string	wallops(Server *server, Session *session, Message  message);
 }
