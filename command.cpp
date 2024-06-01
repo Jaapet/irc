@@ -540,11 +540,11 @@ std::string	Command::kick(Server *server, Session *session, Message  message)
 		return(Error::ERR_NOSUCHCHANNEL_403(server,session,message));
 	Channel *chan = server->getChannel(message.params[0]);
 	if(chan->is_op(session->getNickName()) == false)
-		return(Error::ERR_CHANOPRIVSNEEDED_482(server,session,message.params[1]));
+		return(Error::ERR_CHANOPRIVSNEEDED_482(server,session,message.params[0]));
 	if(session->getChannel() != chan)
 		return(Error::ERR_NOTONCHANNEL_442(server,session,message));
 	if(chan->is_user(message.params[1]) == false)
-		return(Error::ERR_USERNOTINCHANNEL_441(server,session,message.params[1],message.params[0]));
+		return(Error::ERR_USERNOTINCHANNEL_441(server,session,message.params[1],message.params[1]));
 	std::string reason;
 	if(message.payload.empty())
 		reason = " Reason not known";
@@ -695,10 +695,11 @@ std::string	Command::mode(Server *server, Session *session, Message  message)
 	}
 	if(message.params[1][0] == '+' && (message.params[1][1] == 'l'))
 	{
-		std::string tmp = message.params[2]; //I did this because atoi does crazy shit
-		int max_user = atoi(tmp.c_str());
+		
 		if(message.params[2].empty())
 			return(Error::ERR_INVALIDMODEPARAM_696(server,session,&message,"MODE +l should contain a parameter represent the maximum user on this channel"));
+		std::string tmp = message.params[2]; //I did this because atoi does crazy shit
+		int max_user = atoi(tmp.c_str());
 		if(max_user < 1 || max_user > 512)
 			return(Error::ERR_INVALIDMODEPARAM_696(server,session,&message,"MODE +l should be a number between 1 and 512 as parameter"));
 		chan->set_max_users(max_user);
