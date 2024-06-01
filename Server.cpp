@@ -115,11 +115,11 @@ void Server::launchListen(void)
 void Server::initSessionsFds(void)
 {
 	Debug::Info("Attempt to create fd set for the clients sessions ");
-	FD_ZERO(&this->_read_sessions_fd); // TO COMMENT STRAIGHT FROM GPT
-	FD_SET(this->getFdSocket(), &this->_read_sessions_fd); // TO COMMENT STRAIGHT FROM GPT	
+	FD_ZERO(&this->_read_sessions_fd); // Put the fd set at zero
+	FD_SET(this->getFdSocket(), &this->_read_sessions_fd); // put the read server fd in the set
 
-	FD_ZERO(&this->_write_sessions_fd); // TO COMMENT STRAIGHT FROM GPT
-	FD_SET(this->getFdSocket(), &this->_write_sessions_fd); // TO COMMENT STRAIGHT FROM GPT	
+	FD_ZERO(&this->_write_sessions_fd); // Put the fd set at zero
+	FD_SET(this->getFdSocket(), &this->_write_sessions_fd); // put the write server fd in the set
 	
 }
 
@@ -152,15 +152,16 @@ void Server::mapCommands(void)
 
 void Server::handleConnections(void)
 {
-	int fd_max = this->getFdSocket(); //TO COMMENT
-	fd_set read_fd_cpy, write_fd_cpy; //store a copy of session_fd need more explanations
+	int fd_max = this->getFdSocket(); //fd server fd, usually will be fd 3, will be the last fd to iterate until new cnx
+	fd_set read_fd_cpy, write_fd_cpy; //store a copy of session_fd, because macro will modify it
 
 
 	while(!(this->getKill()))
 	{
-		read_fd_cpy = this->_read_sessions_fd; //work on copy fdp set because someone told me to do that for an unknown reason
+		read_fd_cpy = this->_read_sessions_fd; //work on copy fdp set   because macro will modify it, each while itteration it take back the master set
+
 		write_fd_cpy = this->_write_sessions_fd;
-		if(select(fd_max + 1, &read_fd_cpy, &write_fd_cpy, NULL, &this->_select_timeout) == -1) //select between read & write fdp with a specified timeout
+		if(select(fd_max + 1, &read_fd_cpy, &write_fd_cpy, NULL, &this->_select_timeout) == -1) //select between read & write fd with a specified timeout
 			throw(Server::SelectCallError()); 
 		for(int i = 0; i <= fd_max; i++)
 		{	
@@ -204,6 +205,7 @@ void Server::handleNewSession(int &fd_max)
 void Server::handleReadEvents(int cur_fd)
 {
 	char buffer[BUFFER_SIZE];
+	memset(buffer,'\0',BUFFER_SIZE);
 	int nbytes = recv(cur_fd, buffer, sizeof(buffer), 0);
 	if (nbytes == 0)
 	{
@@ -242,8 +244,14 @@ void Server::handleReadEvents(int cur_fd)
 		buffer[nbytes] = '\0'; //Terminate buffer with \0, good old char *
 
 		Debug::Message(std::string(buffer), cur_fd);
-
-		this->executeCommands(this->splitBuffer(buffer), cur_fd);
+		this->_sessions[cur_fd]->addRecvBuffer(buffer);
+		if(Utils::containsCRLF(this->_sessions[cur_fd]->getRecvBuffer()))
+		{
+			this->executeCommands(this->splitBuffer(this->_sessions[cur_fd]->getRecvBuffer()), cur_fd);
+			if(this->_sessions[cur_fd] != NULL)
+				this->_sessions[cur_fd]->clearRecvBuffer();
+		}
+		
 	}
 }
 

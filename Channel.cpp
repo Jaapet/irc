@@ -4,7 +4,7 @@ Channel::Channel (std::string const &name, std::string const &founder)
 {
 	this->name = name;
 	this->founder = founder;
-	this->op_topic = false;
+	this->op_topic = true;
 	this->invite = false;
 	this->pw = "";
 	this->topic = "";
