@@ -168,34 +168,42 @@ std::string	Command::privmsg(Server *server, Session *session, Message  message)
 		return (Error::ERR_NORECIPIENT_411(server, session, message));
 	if (message.payload.empty() && message.params.size() == 1)
 		return (Error::ERR_NOTEXTTOSNED_412(server, session, message));
-	if(message.params[0].find('#') != std::string::npos || message.params[0].find('&') != std::string::npos) //If PRIVMSG TO A CHANNEL
+	std::vector<std::string> targets = Utils::split(message.params[0], ',');
+	for(size_t i = 0; i < targets.size(); i++)
 	{
-		if (!Utils::isValidChannelName(message.params[0]))
-			return (Error::ERR_BADCHANMASK_476(server, session, message.params[0]));
-		Channel *target = server->getChannel(message.params[0].substr(message.params[0].find('#'))); //remove possible flags
-		if(target == NULL)
-			return(Error::ERR_NOSUCHCHANNEL_403(server, session, message));
-		if(session->getChannel() != target)
-			return(Error::ERR_CANNOTSENDTICHAN_404(server, session, message));
-		if(!message.payload.empty())
-			msg = Utils::getUserPrefix(server, session) + command_name + " " + message.params[0] + " :" + message.payload + Reply::endr;
-		if(!msg.empty())
-			Utils::sendToChannel(server, target, session->getNickName(),  msg, message.params[0]);
-	}
-	else //If PRIVMSG TO AN USER
-	{
-		if (!server->getSession(message.params[0]))
-			return (Error::ERR_NOSUCHNICK_401(server, session, message));
-		if (session->getAwayStatus() != "" && command_name != "NOTICE")
-			return (Reply::RPL_AWAY_301(server, session, message));
-		if(!message.payload.empty())
-			msg = Utils::getUserPrefix(server, session) + command_name + " " + message.params[0] + " :" + message.payload + Reply::endr;
-		else if(!message.params[1].empty())
-			msg = Utils::getUserPrefix(server, session) + command_name + " " + message.params[0] + " :" + message.params[1] + Reply::endr; //Add for more natural command line
+		if(targets[i].find('#') != std::string::npos || targets[i].find('&') != std::string::npos) //If PRIVMSG TO A CHANNEL
+		{
+			if(!Utils::isValidChannelName(targets[i]))
+				return (Error::ERR_BADCHANMASK_476(server, session, targets[i]));
+			Channel *target = server->getChannel(targets[i].substr(targets[i].find('#'))); //remove possible flags
+			if(target == NULL)
+				return(Error::ERR_NOSUCHCHANNEL_403(server, session, message));
+			if(session->getChannel() != target)
+				return(Error::ERR_CANNOTSENDTICHAN_404(server, session, message));
+			if(!message.payload.empty())
+				msg = Utils::getUserPrefix(server, session) + command_name + " " + targets[i] + " :" + message.payload + Reply::endr;
+			if(!msg.empty() && targets.size() == 1)
+				Utils::sendToChannel(server, target, session->getNickName(),  msg, targets[i]);
+			else if(!msg.empty())
+				Utils::sendToChannel(server, target, "sender dummy to send the message evem to the sender",  msg, targets[i]);
+		}
+		else //If PRIVMSG TO AN USER
+		{
+			Message tmp = message;
+			tmp.params[0] = targets[i];
+			if(!server->getSession(targets[i]))
+				return (Error::ERR_NOSUCHNICK_401(server, session, tmp));
+			if(session->getAwayStatus() != "" && command_name != "NOTICE")
+				return (Reply::RPL_AWAY_301(server, session, message));
+			if(!message.payload.empty())
+				msg = Utils::getUserPrefix(server, session) + command_name + " " + targets[i] + " :" + message.payload + Reply::endr;
+			else if(!message.params[1].empty())
+				msg = Utils::getUserPrefix(server, session) + command_name + " " + targets[i] + " :" + message.params[1] + Reply::endr; //Add for more natural command line
 
-		server->getSession(message.params[0])->addSendBuffer(msg);
+			server->getSession(targets[i])->addSendBuffer(msg);
+		}
 	}
-
+	
 	return ("");
 }
 

@@ -12,5 +12,5 @@
 
 list here all the issues
 
-/part
-/join error too many chan
+handle channel name insensitive case
+handle multiple privmsg

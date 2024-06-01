@@ -35,6 +35,8 @@ private:
 	bool _realname_is_set;
 	std::string _sendBuffer;
 	std::string _recvBuffer;
+	size_t		_send_bytes;
+	size_t		_recv_bytes;
 	bool		_waitpong;
 	std::time_t _lastpong;
 	std::string	_away_status;
@@ -112,10 +114,12 @@ public:
 	void addSendBuffer(std::string &str)
 	{
 		this->_sendBuffer += str;
+		this->_recv_bytes = str.size();
 	}
 	void addRecvBuffer(char *str)
 	{
 		this->_recvBuffer += str;
+		this->_send_bytes = std::string(str).size();
 	}
 	std::string &getRecvBuffer(void)
 		{return(this->_recvBuffer);}

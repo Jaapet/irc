@@ -248,7 +248,8 @@ void Server::handleReadEvents(int cur_fd)
 		if(Utils::containsCRLF(this->_sessions[cur_fd]->getRecvBuffer()))
 		{
 			this->executeCommands(this->splitBuffer(this->_sessions[cur_fd]->getRecvBuffer()), cur_fd);
-			this->_sessions[cur_fd]->clearRecvBuffer();
+			if(this->_sessions[cur_fd] != NULL)
+				this->_sessions[cur_fd]->clearRecvBuffer();
 		}
 		
 	}
