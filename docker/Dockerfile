@@ -5,7 +5,8 @@ FROM ubuntu:latest
 WORKDIR /app
 
 # Copy the ircserv file from the host machine's ../ircserv directory to the container
-COPY ../ircserv /app/ircserv
+#  Don't forget to move the binary
+COPY ./ircserv /app/ircserv
 
 # Make sure the copied file is executable
 RUN chmod +x /app/ircserv
@@ -16,4 +17,4 @@ RUN apt-get update && \
     apt-get clean
 
 # Run the ircserv program with valgrind and the specified arguments
-CMD ["valgrind", "/app/ircserv", "42password", "56667"]
+CMD ["valgrind", "/app/ircserv", "42password", "6667"]

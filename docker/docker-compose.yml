@@ -6,6 +6,12 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "56667:56667"
+      - "6667:6667"
     restart: "no"
     hostname: irc.gmcg.fr
+    ulimits:
+      nofile:
+        soft: 1024
+        hard: 2048
+
+#Doesnt work no se porque jpta
