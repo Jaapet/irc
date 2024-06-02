@@ -25,6 +25,18 @@ std::string Utils::strToUpper(std::string const &str)
 	return(out);
 }
 
+std::string Utils::strToLower(std::string const &str)
+{
+	std::string out = str;
+
+	for (std::string::iterator it = out.begin(); it != out.end(); ++it) 
+	{
+		*it = std::tolower(*it);
+    }
+
+	return(out);
+}
+
 std::string Utils::getCurrentDate(void)
 {
 	// Get the current time as a time_t object

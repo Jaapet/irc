@@ -95,7 +95,8 @@ public:
 		{this->_waitpong = true;}
 	void setChannel(Channel *channel)
 		{this->_channel = channel;}
-
+	void setAwayStatus(std::string str)
+		{this->_away_status = str;}
 	bool authenticate(void); //Every time this method is call it check if everything is meet for completing the auth; then return the correct 4 REPL
 
 

@@ -12,6 +12,3 @@
 
 list here all the issues
 
-handle channel name insensitive case
-handle multiple privmsg
-clear invite list each time +i mode 

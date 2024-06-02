@@ -31,6 +31,8 @@ class Channel;
 
 class Session;
 
+typedef std::string (*CommandPtr)(Server *, Session *, Message );
+
 class Server
 {
 private:
@@ -50,17 +52,24 @@ private:
 	std::string _servername;
 	std::string _networkname;
 	std::string _version;//Set in constructor IDK wtf we should put
+	std::string _version_comments;
 	std::string _available_user_modes;
 	std::string _available_channel_modes;
 	std::string _creation_date;
+	time_t		 _creation_ts;
 	std::string _info;
+	
+	std::string _hoster_location;
+	std::string _hoster_organization;
+	std::string _hoster_contact;
 
 	bool _should_i_end_this_suffering; //Bool set to true to kill the server
 	
 
 	std::map<std::string,Channel *> _channels; // map of the channels, channel name is the key of the map, vallue is the object channel
 	std::map<int, Session *> _sessions; //map of the sessions, session fd is the key
-	typedef std::string (*CommandPtr)(Server *, Session *, Message );
+	size_t _session_max;	
+	
 	std::map<std::string, CommandPtr > _commands;
 	
 	//init method, should only be called by constructor
@@ -91,14 +100,24 @@ public:
 			{return (this->_networkname);}
 		std::string const &getVersion(void) const
 			{return (this->_version);}
+		std::string const &getVersionComments(void) const
+			{return (this->_version_comments);}
 		std::string const &getAvailableUserModes(void) const
 			{return (this->_available_user_modes);}
 		std::string const &getAvailableChannelModes(void) const
 			{return (this->_available_channel_modes);}
 		std::string const &getCreationDate(void) const
 			{return (this->_creation_date);}
+		time_t const &getCreationTs(void) const
+			{return (this->_creation_ts);}
 		std::string const &getInfo(void) const
 			{return (this->_info);}
+		std::string const &getHosterContact(void) const
+			{return (this->_hoster_contact);}
+		std::string const &getHosterLocation(void) const
+			{return (this->_hoster_location);}
+		std::string const &getHosterOrganization(void) const
+			{return (this->_hoster_organization);}
 		bool getKill(void) const
 			{return (this->_should_i_end_this_suffering);}
 		//Socket
@@ -117,10 +136,18 @@ public:
 			{return (this->_sessions);}
 		std::map<std::string,Channel *> const &getChannels(void) const
 			{return (this->_channels);}
+		std::map<std::string,CommandPtr> const &getCommands(void) const
+			{return (this->_commands);}
 		Channel *getChannel(std::string channel_name);
 		Session *getSession(std::string const &nickname);
 
-		
+
+		size_t	getActiveUsersNb(void);
+		size_t	getOperatorUsersNb(void);
+		size_t	getUnknownUsersNb(void);
+		size_t	getChannelsNb(void);
+		size_t 	getSessionMax(void)
+			{return(this->_session_max);}
 	//Setters
 
 	//Methods
@@ -138,4 +165,5 @@ public:
 		void addChannel(std::string chan_name, Channel *channel)
 			{this->_channels[chan_name] = channel;}
 		void removeChannel(std::string chan_name);
+		void getUptime(size_t &day, size_t &hour, size_t &minute, size_t &second);
 };

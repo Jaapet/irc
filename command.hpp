@@ -23,8 +23,8 @@ namespace Command
 	// std::string	oper(Server *server, Session *session, Message  message); //Not to do
 	std::string	quit(Server *server, Session *session, Message  message);
 	// std::string	error(Server *server, Session *session, Message  message); //Not to do
+//Channel operations
 	std::string	join(Server *server, Session *session, Message  message);
-
 	std::string	part(Server *server, Session *session, Message  message);
 	std::string	topic(Server *server, Session *session, Message  message);
 	std::string	names(Server *server, Session *session, Message  message);
@@ -32,15 +32,15 @@ namespace Command
 	std::string	invite(Server *server, Session *session, Message  message);
 	std::string	kick(Server *server, Session *session, Message  message);
 //Server Queries and Commands
-	// std::string	motd(Server *server, Session *session, Message  message); //EF
-	// std::string	version(Server *server, Session *session, Message  message); //EF
-	// std::string	admin(Server *server, Session *session, Message  message); //EF
+	std::string	motd(Server *server, Session *session, Message  message);
+	std::string	version(Server *server, Session *session, Message  message);
+	std::string	admin(Server *server, Session *session, Message  message);
 	// std::string	connect(Server *server, Session *session, Message  message); // to throw an error
-	// std::string	lusers(Server *server, Session *session, Message  message); //GG
-	// std::string	time(Server *server, Session *session, Message  message); //EF
-	// std::string	stats(Server *server, Session *session, Message  message); //EF
-	// std::string	help(Server *server, Session *session, Message  message); //EF
-	// std::string	info(Server *server, Session *session, Message  message); //EF
+	std::string	lusers(Server *server, Session *session, Message  message);
+	std::string	time(Server *server, Session *session, Message  message);
+	std::string	stats(Server *server, Session *session, Message  message);
+	std::string	help(Server *server, Session *session, Message  message);
+	std::string	info(Server *server, Session *session, Message  message);
 	std::string	mode(Server *server, Session *session, Message  message);
 //Sending Messages
 	std::string	privmsg(Server *server, Session *session, Message  message);
@@ -55,8 +55,11 @@ namespace Command
 	// std::string	restart(Server *server, Session *session, Message  message); // Not to do
 	// std::string	squit(Server *server, Session *session, Message  message); // Not to do
 //Optional Messages
-	// std::string	away(Server *server, Session *session, Message  message); //EF
+	std::string	away(Server *server, Session *session, Message  message);
 	// std::string	links(Server *server, Session *session, Message  message); // Not to do
-	// std::string	userhost(Server *server, Session *session, Message  message); //Giga flemme, GG
+	// std::string	userhost(Server *server, Session *session, Message  message); // Not to do
 	std::string	wallops(Server *server, Session *session, Message  message);
+
+//PLACEHOLDER COMMANDS
+	std::string	notimplanted(Server *server, Session *session, Message  message);
 }
