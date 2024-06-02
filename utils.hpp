@@ -18,6 +18,7 @@ namespace Utils
 	std::string removeCRLF(std::string const &str);
 
 	std::string strToUpper(std::string const &str);
+	std::string strToLower(std::string const &str);
 
 	std::string getCurrentDate(void);
 	std::string getCurrentTimestamp();

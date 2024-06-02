@@ -32,6 +32,8 @@ namespace Error
 	std::string ERR_NOPRIVILEGES_481(Server *server, Session *session, Message message);
 	std::string ERR_CHANOPRIVSNEEDED_482(Server *server, Session *session, std::string &chan_name);
 	std::string ERR_UMODEUNKNOWNFLAG_501(Server *server, Session *session);
+	std::string ERR_HELPNOTFOUND_524(Server *server, Session *session, std::string command_name);
+
 	std::string ERR_INVALIDMODEPARAM_696(Server *server, Session *session, Message *message,std::string description);
 
 }

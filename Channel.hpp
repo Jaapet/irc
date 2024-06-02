@@ -64,6 +64,8 @@ public :
 	void	rm_op(std::string const &nickname);
 	bool	rm_user(std::string const &nickname); //PART ; KICK ; false if user not in chan
 	void	invite_user(std::string const &nickname); //INVITE
+	void	clear_invite(void)
+		{this->invited_users.clear();}
 	bool	checkPw(std::string const &pw_to_try)
 		{return(this->pw == pw_to_try);}
 

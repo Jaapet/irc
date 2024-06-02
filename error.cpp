@@ -197,6 +197,15 @@ std::string Error::ERR_UMODEUNKNOWNFLAG_501(Server *server, Session *session)
 	std::string msg = Utils::getServerPrefix(server, session, "501") + ":Unknown MODE flag" + Reply::endr;
 	return(msg);
 }
+
+std::string Error::ERR_HELPNOTFOUND_524(Server *server, Session *session, std::string command_name)
+{
+	Debug::Reply("ERR_HELPNOTFOUND(524)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "524") + command_name +" :No help available on this topic" + Reply::endr;
+	return(msg);
+}
+
 std::string Error::ERR_INVALIDMODEPARAM_696(Server *server, Session *session, Message *message ,std::string description)
 {
 	Debug::Reply("ERR_INVALIDMODEPARAM(696)", session->getFdSocket());
