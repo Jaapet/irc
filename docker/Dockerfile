@@ -17,4 +17,4 @@ RUN apt-get update && \
     apt-get clean
 
 # Run the ircserv program with valgrind and the specified arguments
-CMD ["valgrind", "/app/ircserv", "42password", "56667"]
+CMD ["valgrind", "/app/ircserv", "42password", "6667"]
