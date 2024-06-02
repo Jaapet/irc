@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  ircserv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "56667:56667"
+    restart: "no"
+    hostname: irc.gmcg.fr
