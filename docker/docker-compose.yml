@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "56667:56667"
+      - "56667:6667"
     restart: "no"
     hostname: irc.gmcg.fr
     ulimits:
