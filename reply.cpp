@@ -324,7 +324,7 @@ std::string Reply::RPL_WHOREPLY_352(Server *server, Session *session ,Channel *t
 		    it = sessions.begin();
 		    while (it != sessions.end())
 		    {
-				if(it->second != NULL)
+				if(it->second != NULL && it->second->getAuthenticated() == true)
 				{
 					flag = "H";
 					if(it->second->getAwayStatus() != "")
