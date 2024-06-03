@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   ircserv:
     build:
@@ -13,5 +11,3 @@ services:
       nofile:
         soft: 1024
         hard: 2048
-
-#Doesnt work no se porque jpta
