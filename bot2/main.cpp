@@ -6,7 +6,7 @@
 /*   By: ndesprez <ndesprez@student.42nice.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/30 14:03:15 by edfirmin          #+#    #+#             */
-/*   Updated: 2024/06/02 19:08:20 by ndesprez         ###   ########.fr       */
+/*   Updated: 2024/06/03 15:15:44 by ndesprez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void send_mp(char *buff, int bot_sock)
     std::vector<std::string>   tab = splitBuffer(buff);
     std::vector<std::string>   ttab;
     std::string pre = "PRIVMSG ";
-    std::string suf = " :Hi mate, welcome to our IRC server, hope you enjoy it :)\r\n";
+    std::string suf = " :Hi mate, welcome to our IRC server, hope you enjoy it. Be the first to guess the number between 1 and 1000 !\r\n";
     std::string com;
     for (size_t i = 0; i < tab.size() - 2; i++)
     {
@@ -82,69 +82,6 @@ void send_mp(char *buff, int bot_sock)
         com += pre + ttab[7] + suf;
     }
     send(bot_sock, com.c_str(), std::strlen(com.c_str()), 0);
-}
-
-void parseMessage(const std::string &message, Message &outmessage) 
-{
-	if(message[0] == '\r' && message[1] == '\n')
-		return;
-    outmessage.clear();
-    
-    size_t pos = 0;
-    size_t end = message.size();
-
-    // Check for sender (prefix)
-    if (message[pos] == ':') {
-        size_t prefixEnd = message.find(' ', pos);
-        if (prefixEnd != std::string::npos) 
-		{
-            outmessage.sender = message.substr(pos + 1, prefixEnd - pos - 1);
-            pos = prefixEnd + 1;
-        } 
-		else 
-		{
-            return; // Invalid message format
-        }
-    } 
-	else 
-	{
-        outmessage.sender = "";
-    }
-
-    // Get command
-    size_t commandEnd = message.find(' ', pos);
-    if (commandEnd != std::string::npos) 
-	{
-        outmessage.command = message.substr(pos, commandEnd - pos);
-        pos = commandEnd + 1;
-    } 
-	else 
-	{
-        outmessage.command = message.substr(pos);
-        return;
-    }
-
-    // Get params and payload
-    while (pos < end) {
-        if (message[pos] == ':') 
-		{
-            // Trailing param (payload)
-            outmessage.payload = message.substr(pos + 1);
-            break;
-        }
-        
-        size_t paramEnd = message.find(' ', pos);
-        if (paramEnd != std::string::npos) 
-		{
-            outmessage.params.push_back(message.substr(pos, paramEnd - pos));
-            pos = paramEnd + 1;
-        } 
-		else 
-		{
-            outmessage.params.push_back(message.substr(pos));
-            break;
-        }
-    }
 }
 
 int main(int argc, char **argv)
@@ -162,7 +99,7 @@ int main(int argc, char **argv)
         int serv_sock = 667;
         struct sockaddr_in serv;
         srand(time(NULL));
-        std::string bot_nick("[BOT]");
+        std::string bot_nick("GUESS-");
         char buff[1024];
 
         std::stringstream out;
@@ -202,42 +139,48 @@ int main(int argc, char **argv)
         
         send_mp(buff, bot_sock);
 
-        // mes = "QUIT\r\n";
-        // send(bot_sock, mes.c_str(), std::strlen(mes.c_str()), 0);
-        // size_t k = recv(bot_sock, buff, sizeof(buff) - 1, 0);
-        // buff[k - 1] = '\0';
+        
 
 
-
-        // char buffer[BUFFER_SIZE];
-	    // memset(buffer,'\0',BUFFER_SIZE);
-	    // int nbytes = recv(cur_fd, buffer, sizeof(buffer), 0);
         int rec = 1;
         char buf[1024];
-        Message msg;
         int guess = rand() % 999 + 1;
+        std::cout << "Random number to guess " << guess << std::endl;
         while (rec >= 0)
         {
             rec = recv(bot_sock, buf, sizeof(buf), 0);
-            if (rec < 1024)
+            if (rec < 1024 && rec > 0)
             {
                 buf[rec] = '\0';
-                parseMessage(std::string(buf), msg);
-                if (atoi(msg.payload.c_str()) <= 1000 && atoi(msg.payload.c_str()) > 0)
+                std::vector<std::string> message = split(buf, ' ');
+                message[message.size() - 1].erase(message[message.size() - 1].begin());
+                std::string payload = message[message.size() - 1];
+                std::string sender = message[0].erase(message[0].find('!'));
+                sender.erase(sender.begin());
+                if (atoi(payload.c_str()) <= 1000 && atoi(payload.c_str()) > 0)
                 {
-                    int ans = atoi(msg.payload.c_str());
+                    int ans = atoi(payload.c_str());
                     if (ans < guess)
                         mes = "Higher !\r\n";
                     else if (ans > guess)
                         mes = "Lower !\r\n";
                     else
                     {
-                        mes = "Well played !\r\n";
+                        mes = "Well played ! Goodbye...\r\n";
                     }
                 }
                 else
                     mes = "Send a number between 1 and 1000.\r\n";
-                std::cout << mes << std::endl;
+                std::string rep = "PRIVMSG " + sender + " :" + mes;
+                
+                send(bot_sock, rep.c_str(), std::strlen(rep.c_str()), 0);
+                if(mes == "Well played ! Goodbye...\r\n")
+                {
+                    mes = "QUIT\r\n";
+                    send(bot_sock, mes.c_str(), std::strlen(mes.c_str()), 0);
+                    recv(bot_sock, buff, sizeof(buff) - 1, 0);
+                    exit(0);
+                }
             }
         }
     }
