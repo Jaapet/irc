@@ -37,6 +37,8 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 	this->_hoster_organization = "Hosted by GMCG (985211358), personnal company of ggualerz";
 	this->_hoster_contact = "gregory.gualerzi@gmcg.fr";
 
+	this->_session_max = 0;
+
 	Debug::Info("Persue the server to not commit suicide");
 	this->_should_i_end_this_suffering = false;
 	
