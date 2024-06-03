@@ -5,6 +5,18 @@
 
 volatile sig_atomic_t ctrlc_pressed = 0;
 
+bool isNumeric(char *str) 
+{
+	size_t i = 0;
+    while (str[i])
+	{
+        if (!isdigit(str[i])) 
+            return false;
+		i++;
+    }
+    return true;
+}
+
 bool checkColumn(char *str)
 {
 	int colonCount = 0;
@@ -39,7 +51,7 @@ int main(int argc, char **argv)
 	{
 		
 		port = atoi(argv[1]);
-		if(port < 0 || port > 65535 )
+		if(isNumeric(argv[1]) == false || port < 0 || port > 65535 )
 		{
 			Debug::Error("Invalid port");
 			std::exit(1);

@@ -4,7 +4,7 @@ Channel::Channel (std::string const &name, std::string const &founder)
 {
 	this->name = name;
 	this->founder = founder;
-	this->op_topic = false;
+	this->op_topic = true;
 	this->invite = false;
 	this->pw = "";
 	this->topic = "";
@@ -63,12 +63,15 @@ bool	Channel::is_op(std::string const &nickname)
 
 bool	Channel::is_user(std::string const &nickname)
 {
-	for (size_t i = 0; i < this->users.size(); i++)
+	std::vector<std::string>	user = this->users;
+	std::vector<std::string>::iterator it = user.begin();
+	while(it != user.end())
 	{
-		if (this->users[i] == nickname)
-			return (true);
+		if(it->data() == nickname)
+			return(true);
+		it++;
 	}
-	return (false);
+	return(false);
 }
 
 void	Channel::rm_op(std::string const &nickname)

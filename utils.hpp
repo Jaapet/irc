@@ -18,6 +18,7 @@ namespace Utils
 	std::string removeCRLF(std::string const &str);
 
 	std::string strToUpper(std::string const &str);
+	std::string strToLower(std::string const &str);
 
 	std::string getCurrentDate(void);
 	std::string getCurrentTimestamp();
@@ -40,4 +41,5 @@ namespace Utils
 	}
 	bool isValidChannelName(const std::string& str);
 	std::vector<std::string> split(const std::string& str, char delimiter);
+	bool containsCRLF(const std::string &str);
 }

@@ -25,6 +25,18 @@ std::string Utils::strToUpper(std::string const &str)
 	return(out);
 }
 
+std::string Utils::strToLower(std::string const &str)
+{
+	std::string out = str;
+
+	for (std::string::iterator it = out.begin(); it != out.end(); ++it) 
+	{
+		*it = std::tolower(*it);
+    }
+
+	return(out);
+}
+
 std::string Utils::getCurrentDate(void)
 {
 	// Get the current time as a time_t object
@@ -175,4 +187,16 @@ std::vector<std::string> Utils::split(const std::string& str, char delimiter)
     }
 
     return tokens;
+}
+
+bool Utils::containsCRLF(const std::string &str) 
+{
+    // Iterate through the string
+    for (size_t i = 0; i < str.size() - 1; ++i) {
+        // Check for the sequence "\r\n"
+        if (str[i] == '\r' && str[i + 1] == '\n') {
+            return true;
+        }
+    }
+    return false;
 }

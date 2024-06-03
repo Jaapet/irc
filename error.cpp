@@ -4,7 +4,7 @@ std::string Error::ERR_NOSUCHNICK_401(Server *server, Session *session, Message 
 {
 	Debug::Reply("ERR_NOSUCHNICK(401)", session->getFdSocket());
 
-	std::string msg = Utils::getServerPrefix(server, session, "401") + session->getNickName() + " " + message.params[0] + ":No such nick/channel" + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "401") + session->getNickName() + " " + message.params[0] + " :No such nick/channel" + Reply::endr;
 	return(msg);
 }
 
@@ -34,14 +34,6 @@ std::string Error::ERR_CANNOTSENDTICHAN_404(Server *server, Session *session, Me
 	return(msg);	
 }
 
-std::string Error::ERR_TOOMANYTARGETS_407(Server *server, Session *session, Message message)
-{
-	Debug::Reply("ERR_TOOMANYTARGETS(407)", session->getFdSocket());
-
-	std::string msg = Utils::getServerPrefix(server, session, "407") + session->getNickName() + " " + message.params[0] + "Too many target, care monda" + Reply::endr;
-	return(msg);
-}
-
 std::string Error::ERR_TOOMANYCHANNELS_405(Server *server, Session *session, Message message)
 {
 	(void)message;
@@ -55,6 +47,16 @@ std::string Error::ERR_TOOMANYCHANNELS_405(Server *server, Session *session, Mes
 	std::string msg = Utils::getServerPrefix(server, session, "405") + chan_name + " :You have joined too many channels" + Reply::endr;
 	return(msg);	
 }
+
+std::string Error::ERR_TOOMANYTARGETS_407(Server *server, Session *session, Message message)
+{
+	Debug::Reply("ERR_TOOMANYTARGETS(407)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "407") + session->getNickName() + " " + message.params[0] + "Too many target, care monda" + Reply::endr;
+	return(msg);
+}
+
+
 
 std::string Error::ERR_NORECIPIENT_411(Server *server, Session *session, Message message)
 {
@@ -98,6 +100,13 @@ std::string Error::ERR_NICKNAMEINUSE_433(Server *server, Session *session, Messa
 	std::string msg = Utils::getServerPrefix(server, session, "433") + " " + message.params[0] + " :Nickname is already in use" + Reply::endr;
 	return(msg);	
 }
+std::string  Error::ERR_USERNOTINCHANNEL_441(Server *server, Session *session, std::string nickuser, std::string channel)
+{
+	Debug::Reply("ERR_USERNOTINCHANNEL(441)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "441") + channel + " " + nickuser + " :They aren't on that channel" + Reply::endr;
+	return(msg);
+}
 std::string  Error::ERR_NOTONCHANNEL_442(Server *server, Session *session, Message message)
 {
 	Debug::Reply("ERR_NOTONCHANNEL(442)", session->getFdSocket());
@@ -105,7 +114,13 @@ std::string  Error::ERR_NOTONCHANNEL_442(Server *server, Session *session, Messa
 	std::string msg = Utils::getServerPrefix(server, session, "442") + session->getNickName() + " " + message.params[0] + " :You're not on that channel" + Reply::endr;
 	return(msg);
 }
+std::string  Error::ERR_USERONCHANNEL_443(Server *server, Session *session, std::string nickname, std::string channel)
+{
+	Debug::Reply("ERR_USERONCHANNEL(443)", session->getFdSocket());
 
+	std::string msg = Utils::getServerPrefix(server, session, "443") + channel + " " + nickname + " :is already on channel" + Reply::endr;
+	return(msg);
+}
 std::string Error::ERR_NEEDMOREPARAMS_461(Server *server, Session *session,  Message message)
 {
 	Debug::Reply("ERR_NEEDMOREPARAMS_461(461)", session->getFdSocket());
@@ -182,6 +197,15 @@ std::string Error::ERR_UMODEUNKNOWNFLAG_501(Server *server, Session *session)
 	std::string msg = Utils::getServerPrefix(server, session, "501") + ":Unknown MODE flag" + Reply::endr;
 	return(msg);
 }
+
+std::string Error::ERR_HELPNOTFOUND_524(Server *server, Session *session, std::string command_name)
+{
+	Debug::Reply("ERR_HELPNOTFOUND(524)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "524") + command_name +" :No help available on this topic" + Reply::endr;
+	return(msg);
+}
+
 std::string Error::ERR_INVALIDMODEPARAM_696(Server *server, Session *session, Message *message ,std::string description)
 {
 	Debug::Reply("ERR_INVALIDMODEPARAM(696)", session->getFdSocket());

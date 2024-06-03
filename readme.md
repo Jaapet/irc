@@ -1,3 +1,8 @@
+# ft_irc
+
+Summary
+ft_irc is a project focused on creating your own IRC server. The goal is to understand and implement the Internet Relay Chat protocol, allowing connections from real IRC clients to your custom server. This project helps in grasping the essentials of network communication and solid standard protocols that govern the Internet.
+
 ## Helpful links
 
 - [Insights about ft_irc project](https://ircgod.com/docs/irc/to_know/)
@@ -8,9 +13,4 @@
 - [IRC names](https://stackoverflow.com/a/31714099)
 
 
-# Issues
 
-list here all the issues
-
-/part
-/join error too many chan

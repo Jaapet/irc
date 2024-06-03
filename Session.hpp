@@ -34,6 +34,9 @@ private:
 	std::string _realname;
 	bool _realname_is_set;
 	std::string _sendBuffer;
+	std::string _recvBuffer;
+	size_t		_send_bytes;
+	size_t		_recv_bytes;
 	bool		_waitpong;
 	std::time_t _lastpong;
 	std::string	_away_status;
@@ -92,7 +95,8 @@ public:
 		{this->_waitpong = true;}
 	void setChannel(Channel *channel)
 		{this->_channel = channel;}
-
+	void setAwayStatus(std::string str)
+		{this->_away_status = str;}
 	bool authenticate(void); //Every time this method is call it check if everything is meet for completing the auth; then return the correct 4 REPL
 
 
@@ -111,7 +115,17 @@ public:
 	void addSendBuffer(std::string &str)
 	{
 		this->_sendBuffer += str;
+		this->_recv_bytes = str.size();
 	}
+	void addRecvBuffer(char *str)
+	{
+		this->_recvBuffer += str;
+		this->_send_bytes = std::string(str).size();
+	}
+	std::string &getRecvBuffer(void)
+		{return(this->_recvBuffer);}
+	void clearRecvBuffer(void)
+		{this->_recvBuffer.clear();}
 
 };
 

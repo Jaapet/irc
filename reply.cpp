@@ -47,14 +47,126 @@ std::string Reply:: RPL_MYINFO_004(Server *server, Session *session, Message mes
 	return(msg);
 }
 
+std::string Reply::RPL_STATSUPTIME_242(Server *server, Session *session)
+{
+	Debug::Reply("", session->getFdSocket());
+
+	size_t day,hour,minute,second;
+	server->getUptime(day,hour,minute,second);
+	std::string msg = Utils::getServerPrefix(server,session, "242") + ":Server Up " + Utils::itoa(day) + " days " + Utils::itoa(hour) + ":" + Utils::itoa(minute) + ":" + Utils::itoa(second) + Reply::endr;
+	return(msg);
+}
+
+std::string Reply::RPL_LUSERCLIENT_251(Server *server, Session *session)
+{
+	Debug::Reply("", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server,session, "251") + ":There are " + Utils::itoa(server->getActiveUsersNb()) + " users and 0 invisible on 1 servers" + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_LUSEROP_252(Server *server, Session *session)
+{
+	Debug::Reply("", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server,session, "252") + Utils::itoa(server->getOperatorUsersNb()) + " :operator(s) online" + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_LUSERUNKNOWN_253(Server *server, Session *session)
+{
+	Debug::Reply("", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server,session, "253") + Utils::itoa(server->getUnknownUsersNb()) + " :unknown connection(s)" + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_LUSERCHANNELS_254(Server *server, Session *session)
+{
+	Debug::Reply("", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server,session, "254") + Utils::itoa(server->getChannelsNb()) + " :channels formed" + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_LUSERME_254(Server *server, Session *session)
+{
+	Debug::Reply("", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server,session, "255") + ":I have " + Utils::itoa(server->getActiveUsersNb() + server->getUnknownUsersNb()) + " clients and 1 servers" + Reply::endr;
+	return(msg);
+}
+
+
+std::string Reply::RPL_ADMINME_256(Server *server, Session *session, Server *target_server)
+{
+	Debug::Reply("RPL_ADMINME(256)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "256") + target_server->getHostName() + " :Administrative info" +  Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_ADMINLOC1_257(Server *server, Session *session, Server *target_server)
+{
+	Debug::Reply("RPL_ADMINLOC1(257)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "257") + ":" + target_server->getHosterLocation() + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_ADMINLOC2_258(Server *server, Session *session, Server *target_server)
+{
+	Debug::Reply("RPL_ADMINLOC2(258)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "258")  + ":" + target_server->getHosterOrganization() + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_ADMINEMAIL_259(Server *server, Session *session, Server *target_server)
+{
+	Debug::Reply("RPL_ADMINEMAIL(259)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "259") + ":" + target_server->getHosterContact() + Reply::endr;
+	return(msg);
+}
+
+std::string Reply::RPL_LOCALUSERS_265(Server *server, Session *session)
+{
+	Debug::Reply("RPL_LOCALUSERS(265)", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server, session, "265") + Utils::itoa(server->getActiveUsersNb()) + " " + Utils::itoa(server->getSessionMax()) +" :Current local users " + Utils::itoa(server->getActiveUsersNb()) + ", max " +  Utils::itoa(server->getSessionMax()) + Reply::endr;
+	return(msg);
+}
+
 std::string Reply::RPL_AWAY_301(Server *server, Session *session, Message message)
 {
 	Debug::Reply("ERR_NOTEXTTOSNED(301)", session->getFdSocket());
 
-	std::string msg = Utils::getServerPrefix(server, session, "301") + session->getNickName() + " " + message.params[0] + " :" + session->getAwayStatus() + Reply::endr;
+	std::string msg = Utils::getServerPrefix(server, session, "301") + message.params[0] + " :" + session->getAwayStatus() + Reply::endr;
 	return(msg);
 }
 
+std::string Reply::RPL_UNAWAY_305(Server *server, Session *session)
+{
+	Debug::Reply("RPL_UNAWAY(305)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "305") + ":You are no longer marked as being away" + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_NOWAWAY_306(Server *server, Session *session)
+{
+	Debug::Reply("RPL_NOWAWAY(306)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "306") + ":You have been marked as being away" + Reply::endr;
+	return(msg);
+}
+
+std::string Reply::RPL_WHOISREGNICK_307(Server *server, Session *session, std::string nickname)
+{
+	Debug::Reply("RPL_WHOISREGNICK(307)", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server, session, "307") + nickname + " :has identified for this nick" + Reply::endr;
+	return(msg);
+}
+
+std::string Reply::RPL_WHOISUSER_311(Server *server, Session *session, Session *target)
+{
+	Debug::Reply("RPL_WHOISUSER(311)", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server, session, "311") + target->getNickName() + " " + target->getUserName() + " " + server->getHostName() + " * :" + target->getRealName() + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_WHOISSERVER_312(Server *server, Session *session, Session *target)
+{
+	Debug::Reply("RPL_WHOISSERVER(312)", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server, session, "312") + target->getNickName() + " " + server->getHostName() + " :" + server->getInfo() + Reply::endr;
+	return(msg);
+}
 std::string Reply::RPL_ENDOFWHO_315(Server *server, Session *session, Message message)
 {
 	Debug::Reply("RPL_ENDOFWHO(315)", session->getFdSocket());
@@ -62,6 +174,32 @@ std::string Reply::RPL_ENDOFWHO_315(Server *server, Session *session, Message me
 	msg = Utils::getServerPrefix(server, session, "315") + message.params[0] + " :End of WHO list" + Reply::endr;
 	return(msg);
 }
+std::string Reply::RPL_WHOISCHANNELS_319(Server *server, Session *session, Session *target)
+{
+	Debug::Reply("RPL_WHOISCHANNELS(319)", session->getFdSocket());
+	if(target->getChannel() == NULL)
+		return("");
+	std::string op;
+	if(target->getChannel()->is_op(target->getNickName()) == true)
+		op = "@";
+	std::string msg = Utils::getServerPrefix(server, session, "319") + target->getNickName() + " :" + op + target->getChannel()->get_name() + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_WHOISSPECIAL_320(Server *server, Session *session, Session *target)
+{
+	Debug::Reply("RPL_WHOISSPECIAL(320)", session->getFdSocket());
+	std::string special = "All user cannot be server wide operator nor idle, this functionality is not supported";
+	if(target->getNickName() == "edfirmin")
+		special = "Some people says that I look like the donkey in Schreck, I'm not dubed by Eddie Murphy";
+	if(target->getNickName() == "ggualerz")
+		special = "Yes it's me who wrote terrible things on WHOIS cmd for edfirmin && ndesprez";
+	if(target->getNickName() == "ndesprez")
+		special = "I did a tmongell on this project, it's my repository but I will probably never read those lines";
+	std::string msg;
+	msg = Utils::getServerPrefix(server, session, "320") + target->getNickName() + " :" + special + Reply::endr;
+	return(msg);
+}
+
 std::string Reply::RPL_LISTSTART_321(Server *server, Session *session)
 {
 	Debug::Reply("RPL_LISTSTART(321)", session->getFdSocket());
@@ -151,6 +289,20 @@ std::string Reply::RPL_TOPICWHOTIME_333(Server *server, Session *session, Channe
 	std::string msg = Utils::getServerPrefix(server, session, "333") + channel->get_name() + " " + channel->get_topic_user() + " " + channel->get_topic_timestamp() +  Reply::endr;
 	return(msg);
 }
+std::string Reply::RPL_INVITING_341(Server *server, Session *session, std::string nickname, std::string channel)
+{
+	Debug::Reply("RPL_INVITING(341)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "341") + nickname + " " + channel +  Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_VERSION_351(Server *server, Session *session, std::string server_name)
+{
+	Debug::Reply("RPL_VERSION(351)", session->getFdSocket());
+
+	std::string msg = Utils::getServerPrefix(server, session, "351") + server->getVersion() + " " + server_name + " " + server->getVersionComments() +  Reply::endr;
+	return(msg);
+}
 //target_channel || target_session, one should be NULL, if all are null, will send all the user of the server like a WHO 0
 std::string Reply::RPL_WHOREPLY_352(Server *server, Session *session ,Channel *target_channel, Session *target_session)
 {
@@ -172,7 +324,7 @@ std::string Reply::RPL_WHOREPLY_352(Server *server, Session *session ,Channel *t
 		    it = sessions.begin();
 		    while (it != sessions.end())
 		    {
-				if(it->second != NULL)
+				if(it->second != NULL && it->second->getAuthenticated() == true)
 				{
 					flag = "H";
 					if(it->second->getAwayStatus() != "")
@@ -240,5 +392,64 @@ std::string Reply::RPL_ENDOFNAMES_366(Server *server, Session *session, std::str
 	Debug::Reply("RPL_ENDOFNAMES(366)", session->getFdSocket());
 	std::string msg = Utils::getServerPrefix(server,session,"366") + chan_name + " :End of /NAMES list" + Reply::endr;
 
+	return(msg);
+}
+std::string Reply::RPL_INFO_371(Server *server, Session *session, std::string info_str)
+{
+	Debug::Reply("RPL_INFO(371)", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server,session,"371") + ":" + info_str + Reply::endr;
+
+	return(msg);
+}
+std::string Reply::RPL_MOTD_372(Server *server, Session *session, std::string motd_line)
+{
+	Debug::Reply("RPL_MOTD(372)", session->getFdSocket());
+	std::string msg =  Utils::getServerPrefix(server,session,"372") + ":" + motd_line + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_ENDOFINFO_374(Server *server, Session *session)
+{
+	Debug::Reply("RPL_ENDOFINFO(374)", session->getFdSocket());
+	std::string msg = Utils::getServerPrefix(server,session,"374") + ":End of INFO list" + Reply::endr;
+
+	return(msg);
+}
+std::string Reply::RPL_MOTDSTART_375(Server *server, Session *session, std::string server_name)
+{
+	Debug::Reply("RPL_MOTDSTART(375)", session->getFdSocket());
+	std::string msg =  Utils::getServerPrefix(server,session,"375") + ":- " + server_name + " Message of the day - " + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_ENDOFMOTD_376(Server *server, Session *session)
+{
+	Debug::Reply("RPL_ENDOFMOTD(376)", session->getFdSocket());
+	std::string msg =  Utils::getServerPrefix(server,session,"376") + ":End of /MOTD command." + Reply::endr;
+	return(msg);
+}
+
+std::string Reply::RPL_TIME_391(Server *server, Session *session, Server *target_srv)
+{
+	Debug::Reply("RPL_TIME(391)", session->getFdSocket());
+	std::string msg =  Utils::getServerPrefix(server,session,"391") + target_srv->getHostName() + " " + Utils::getCurrentTimestamp() + " :" + Utils::getCurrentDate() + Reply::endr;
+	return(msg);
+}
+
+
+std::string Reply::RPL_HELPSTART_704(Server *server, Session *session, std::string subject, std::string firstline)
+{
+	Debug::Reply("RPL_HELPSTART(704)", session->getFdSocket());
+	std::string msg =  Utils::getServerPrefix(server,session,"704") + subject + " :###" + firstline + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_HELPTXT_705(Server *server, Session *session, std::string subject, std::string line)
+{
+	Debug::Reply("RPL_HELPTXT(705)", session->getFdSocket());
+	std::string msg =  Utils::getServerPrefix(server,session,"705") + subject + " :" + line + Reply::endr;
+	return(msg);
+}
+std::string Reply::RPL_ENDOFHELP_706(Server *server, Session *session, std::string subject, std::string lastline)
+{
+	Debug::Reply("RPL_ENDOFHELP(706)", session->getFdSocket());
+	std::string msg =  Utils::getServerPrefix(server,session,"706") + subject + " :" + lastline + Reply::endr;
 	return(msg);
 }

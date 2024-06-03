@@ -24,11 +24,21 @@ Server::Server(std::string hostname, std::string pwd, uint16_t port): _hostname(
 	this->_select_timeout.tv_usec = 0;
 
 	this->_servername = hostname;
-	this->_networkname = "NETWORK_NAME";
+	this->_networkname = "Peppa network";
 	this->_version = "ft_irc-1.0";
-	this->_available_user_modes = "*";
-	this->_available_channel_modes = "itkol";
+	this->_version_comments = "Released for ft_irc a 42school project MAY/JUNE 2024";
+	this->_available_user_modes = "0"; // no available user mode
+	this->_available_channel_modes = "itkol"; //user mode specified by the subject
 	this->_creation_date = Utils::getCurrentDate();
+	this->_creation_ts = std::time(NULL);
+	this->_info = "This server run on ft_irc a 42school project"; //, it was made by edfirmin ggualerzi and ndesprez for a 42 project. This server app doesnt handle SASL, SSL, MultiServer, server wide operator or idle";
+	
+	this->_hoster_location = "Hosted in Antibes, France";
+	this->_hoster_organization = "Hosted by GMCG (985211358), personnal company of ggualerz";
+	this->_hoster_contact = "gregory.gualerzi@gmcg.fr";
+
+	this->_session_max = 0;
+
 	Debug::Info("Persue the server to not commit suicide");
 	this->_should_i_end_this_suffering = false;
 	
@@ -114,48 +124,81 @@ void Server::launchListen(void)
 void Server::initSessionsFds(void)
 {
 	Debug::Info("Attempt to create fd set for the clients sessions ");
-	FD_ZERO(&this->_read_sessions_fd); // TO COMMENT STRAIGHT FROM GPT
-	FD_SET(this->getFdSocket(), &this->_read_sessions_fd); // TO COMMENT STRAIGHT FROM GPT	
+	FD_ZERO(&this->_read_sessions_fd); // Put the fd set at zero
+	FD_SET(this->getFdSocket(), &this->_read_sessions_fd); // put the read server fd in the set
 
-	FD_ZERO(&this->_write_sessions_fd); // TO COMMENT STRAIGHT FROM GPT
-	FD_SET(this->getFdSocket(), &this->_write_sessions_fd); // TO COMMENT STRAIGHT FROM GPT	
+	FD_ZERO(&this->_write_sessions_fd); // Put the fd set at zero
+	FD_SET(this->getFdSocket(), &this->_write_sessions_fd); // put the write server fd in the set
 	
 }
 
 void Server::mapCommands(void)
 {
 	Debug::Info("Attempt to map commands ");
+//Connection Messages
 	this->_commands["CAP"] = &(Command::cap);
+	this->_commands["AUTHENTICATE"] = &(Command::notimplanted);
 	this->_commands["PASS"] = &(Command::pass);
 	this->_commands["NICK"] = &(Command::nick);
 	this->_commands["USER"] = &(Command::user);
 	this->_commands["PING"] = &(Command::ping);
 	this->_commands["PONG"] = &(Command::pong);
+	this->_commands["OPER"] = &(Command::notimplanted);
 	this->_commands["QUIT"] = &(Command::quit);
-	this->_commands["PRIVMSG"] = &(Command::privmsg);
-	this->_commands["NOTICE"] = &(Command::privmsg); //Pourquoi pas launch la cmd PRIVMSG
+	this->_commands["ERROR"] = &(Command::notimplanted);
+//Channel operations
 	this->_commands["JOIN"] = &(Command::join);
 	this->_commands["PART"] = &(Command::part);
-	this->_commands["WHO"] = &(Command::who);
-	this->_commands["NAMES"] = &(Command::names);
-	this->_commands["MODE"] = &(Command::mode);
 	this->_commands["TOPIC"] = &(Command::topic);
+	this->_commands["NAMES"] = &(Command::names);
 	this->_commands["LIST"] = &(Command::list);
-	
+	this->_commands["INVITE"] = &(Command::invite);
+	this->_commands["KICK"] = &(Command::kick);
+//Server Queries and Commands
+	this->_commands["MOTD"] = &(Command::motd);
+	this->_commands["VERSION"] = &(Command::version);
+	this->_commands["VERSIO"] = &(Command::version); //Add a version alias for hexchat who want to send privmsg instead
+	this->_commands["ADMIN"] = &(Command::admin);
+	this->_commands["CONNECT"] = &(Command::notimplanted);
+	this->_commands["LUSERS"] = &(Command::lusers);
+	this->_commands["TIME"] = &(Command::time);
+	this->_commands["STATS"] = &(Command::stats);
+	this->_commands["HELP"] = &(Command::help);
+	this->_commands["SRVHELP"] = &(Command::help);
+	this->_commands["INFO"] = &(Command::info);
+	this->_commands["MODE"] = &(Command::mode);
+//Sending Messages
+	this->_commands["PRIVMSG"] = &(Command::privmsg);
+	this->_commands["NOTICE"] = &(Command::privmsg); //Pourquoi pas launch la cmd PRIVMSG
+//User-Based Queries
+	this->_commands["WHO"] = &(Command::who);
+	this->_commands["WHOIS"] = &(Command::whois);
+	this->_commands["WHOWAS"] = &(Command::notimplanted);
+//Operator Messages
+	this->_commands["KILL"] = &(Command::notimplanted);
+	this->_commands["REHASH"] = &(Command::notimplanted);
+	this->_commands["RESTART"] = &(Command::notimplanted);
+	this->_commands["SQUIT"] = &(Command::notimplanted);
+//Optional Messages
+	this->_commands["AWAY"] = &(Command::away);
+	this->_commands["LINKS"] = &(Command::notimplanted);
+	this->_commands["USERHOST"] = &(Command::notimplanted);
+	this->_commands["WALLOPS"] = &(Command::wallops);
 }
 
 
 void Server::handleConnections(void)
 {
-	int fd_max = this->getFdSocket(); //TO COMMENT
-	fd_set read_fd_cpy, write_fd_cpy; //store a copy of session_fd need more explanations
+	int fd_max = this->getFdSocket(); //fd server fd, usually will be fd 3, will be the last fd to iterate until new cnx
+	fd_set read_fd_cpy, write_fd_cpy; //store a copy of session_fd, because macro will modify it
 
 
 	while(!(this->getKill()))
 	{
-		read_fd_cpy = this->_read_sessions_fd; //work on copy fdp set because someone told me to do that for an unknown reason
+		read_fd_cpy = this->_read_sessions_fd; //work on copy fdp set   because macro will modify it, each while itteration it take back the master set
+
 		write_fd_cpy = this->_write_sessions_fd;
-		if(select(fd_max + 1, &read_fd_cpy, &write_fd_cpy, NULL, &this->_select_timeout) == -1) //select between read & write fdp with a specified timeout
+		if(select(fd_max + 1, &read_fd_cpy, &write_fd_cpy, NULL, &this->_select_timeout) == -1) //select between read & write fd with a specified timeout
 			throw(Server::SelectCallError()); 
 		for(int i = 0; i <= fd_max; i++)
 		{	
@@ -193,12 +236,15 @@ void Server::handleNewSession(int &fd_max)
 		if(this->_sessions[tmp_sess->_fd_socket] != NULL)
 			throw(Server::DuplicatedSessionFd());
 		this->_sessions[tmp_sess->_fd_socket] = tmp_sess;
+		if(this->getActiveUsersNb() + this->getUnknownUsersNb() > this->_session_max)
+			this->_session_max = this->getActiveUsersNb() + this->getUnknownUsersNb();
 		Debug::Info("New connection from " + std::string(inet_ntoa(tmp_sess->_address_socket.sin_addr)));
 	}
 }
 void Server::handleReadEvents(int cur_fd)
 {
 	char buffer[BUFFER_SIZE];
+	memset(buffer,'\0',BUFFER_SIZE);
 	int nbytes = recv(cur_fd, buffer, sizeof(buffer), 0);
 	if (nbytes == 0)
 	{
@@ -237,8 +283,14 @@ void Server::handleReadEvents(int cur_fd)
 		buffer[nbytes] = '\0'; //Terminate buffer with \0, good old char *
 
 		Debug::Message(std::string(buffer), cur_fd);
-
-		this->executeCommands(this->splitBuffer(buffer), cur_fd);
+		this->_sessions[cur_fd]->addRecvBuffer(buffer);
+		if(Utils::containsCRLF(this->_sessions[cur_fd]->getRecvBuffer()))
+		{
+			this->executeCommands(this->splitBuffer(this->_sessions[cur_fd]->getRecvBuffer()), cur_fd);
+			if(this->_sessions[cur_fd] != NULL)
+				this->_sessions[cur_fd]->clearRecvBuffer();
+		}
+		
 	}
 }
 
@@ -428,7 +480,7 @@ void Server::cleanExit(int exitcode)
 				this->removeChannel(toErase->first);
 			}
 	       		
-	        this->_channels.erase(toErase->first); // Erase the element after moving the iterator
+	        // this->_channels.erase(toErase); // Erase the element after moving the iterator
 	    }
 	}
 	//Clean Essions
@@ -475,14 +527,17 @@ void Server::cleanExit(int exitcode)
 
 Channel *Server::getChannel(std::string channel_name)
 {
-	try
+
+	std::map<std::string,Channel *> channels = this->getChannels();
+	std::map<std::string,Channel *>::iterator it = channels.begin();
+
+	while(it != channels.end())
 	{
-		return(this->_channels.at(channel_name));
+		if(!(it->first.empty()) && Utils::strToUpper(it->first) ==  Utils::strToUpper(channel_name))
+			return(it->second);
+		it++;
 	}
-	catch(const std::exception& e)
-	{
-		return(NULL);
-	}
+	return(NULL);
 }
 
 void Server::removeChannel(std::string chan_name)
@@ -494,4 +549,80 @@ void Server::removeChannel(std::string chan_name)
 	}
 	delete this->_channels.at(chan_name);
  	this->_channels.erase(chan_name);
-}	
+}
+
+size_t	Server::getActiveUsersNb(void)
+{
+	std::map<int, Session*> sessions = this->getSessions();
+	std::map<int, Session*>::iterator it = sessions.begin();
+	size_t users = 0;
+	while(it != sessions.end())
+	{
+		if(it->second != NULL && it->second->getAuthenticated() == true)
+			users++;
+		it++;
+	}
+	return(users);
+}
+size_t	Server::getOperatorUsersNb(void)
+{
+	std::map<int, Session*> sessions = this->getSessions();
+	std::map<int, Session*>::iterator it = sessions.begin();
+	size_t users = 0;
+	while(it != sessions.end())
+	{
+		if(	it->second != NULL && \
+			it->second->getAuthenticated() == true &&\
+			it->second->getChannel() != NULL && \
+			it->second->getChannel()->is_op(it->second->getNickName()) == true)
+			users++;
+		it++;
+	}
+	return(users);
+}
+size_t	Server::getUnknownUsersNb(void)
+{
+	std::map<int, Session*> sessions = this->getSessions();
+	std::map<int, Session*>::iterator it = sessions.begin();
+	size_t users = 0;
+	while(it != sessions.end())
+	{
+		if(it->second != NULL && it->second->getAuthenticated() == false)
+			users++;
+		it++;
+	}
+	return(users);
+}
+size_t	Server::getChannelsNb(void)
+{
+	std::map<std::string, Channel*> channels = this->getChannels();
+	std::map<std::string, Channel*>::iterator it = channels.begin();
+	size_t chan_nb = 0;
+	while(it != channels.end())
+	{
+		if(it->second != NULL)
+			chan_nb++;
+		it++;
+	}
+	return(chan_nb);
+}
+
+void Server::getUptime(size_t &day, size_t &hour, size_t &minute, size_t &second)
+{
+    // Parse the Unix timestamp from the server creation date
+    std::time_t creationTime = this->getCreationTs();
+
+    // Get the current time as a Unix timestamp
+    std::time_t currentTime = std::time(0);
+
+    // Calculate the difference in seconds
+    std::time_t diff = currentTime - creationTime;
+
+    // Convert the difference into days, hours, minutes, and seconds
+    day = diff / (24 * 3600);
+    diff %= (24 * 3600);
+    hour = diff / 3600;
+    diff %= 3600;
+    minute = diff / 60;
+    second = diff % 60;
+}
