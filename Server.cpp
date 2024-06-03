@@ -411,11 +411,7 @@ void Server::parseMessage(const std::string &message, Message &outmessage)
 
 void Server::setNonBlockingFd(int fd) 
 {
-    int flags = fcntl(fd, F_SETFL, O_NONBLOCK);
-    if (flags == -1) {
-        throw std::runtime_error("fcntl F_GETFL failed");
-    }
-    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+    if (fcntl(fd, F_SETFL,O_NONBLOCK) == -1) {
         throw std::runtime_error("fcntl F_SETFL failed");
     }
 }
